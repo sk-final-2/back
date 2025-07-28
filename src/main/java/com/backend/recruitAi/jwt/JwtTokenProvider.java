@@ -1,16 +1,27 @@
 package com.backend.recruitAi.jwt;
 
+import com.backend.recruitAi.member.entity.Member;
 import com.backend.recruitAi.member.entity.Role;
+import com.backend.recruitAi.member.repository.MemberRepository;
+import com.backend.recruitAi.member.service.CustomUserDetails;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
-
+import static org.springframework.security.config.Customizer.withDefaults;
 import java.util.Date;
-
+@RequiredArgsConstructor
 @Component
 public class JwtTokenProvider {
+    @Autowired
+    private final MemberRepository memberRepository;
 
     @Value("${jwt.secret}")
     private String secretKey;
