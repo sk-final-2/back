@@ -1,5 +1,6 @@
 package com.backend.recruitAi.email.controller;
 
+import com.backend.recruitAi.common.dto.ResponseDto;
 import com.backend.recruitAi.email.service.EmailVerificationService;
 import com.backend.recruitAi.email.dto.EmailRequestDto;
 import com.backend.recruitAi.email.dto.EmailVerificationRequestDto;
@@ -15,18 +16,18 @@ public class EmailVerificationController {
     private final EmailVerificationService verificationService;
 
     @PostMapping("/send")
-    public ResponseEntity<String> sendCode(@RequestBody EmailRequestDto request) {
+    public ResponseDto<String> sendCode(@RequestBody EmailRequestDto request) {
         System.out.println("📩 이메일 인증 요청 도착: " + request.getEmail());
         verificationService.sendCode(request.getEmail());
-        return ResponseEntity.ok("인증 메일이 전송되었습니다.");
+        return ResponseDto.success("이메일 인증 요청 완료");
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<String> verify(@RequestBody EmailVerificationRequestDto request) {
+    public ResponseDto<String> verify(@RequestBody EmailVerificationRequestDto request) {
         boolean success = verificationService.verifyCode(request.getEmail(), request.getCode());
         return success
-                ? ResponseEntity.ok("인증 성공")
-                : ResponseEntity.status(400).body("인증 실패");
+                ? ResponseDto.success("인증 성공")
+                : ResponseDto.error(400,"인증 실패","인증실패");
     }
 }
 
