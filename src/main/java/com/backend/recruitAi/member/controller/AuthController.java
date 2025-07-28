@@ -1,6 +1,7 @@
 package com.backend.recruitAi.member.controller;
 
 import com.backend.recruitAi.jwt.JwtTokenProvider;
+import com.backend.recruitAi.jwt.RefreshTokenService;
 import com.backend.recruitAi.member.dto.LoginRequest;
 import com.backend.recruitAi.member.dto.SignupRequest;
 import com.backend.recruitAi.member.entity.Member;
@@ -24,6 +25,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+    @Autowired private RefreshTokenService refreshTokenService;
 
     @Autowired private MemberRepository memberRepository;
     @Autowired private PasswordEncoder passwordEncoder;
@@ -58,46 +60,45 @@ public class AuthController {
         String accessToken = jwtTokenProvider.createAccessToken(member.getEmail(), member.getRole());
         String refreshToken = jwtTokenProvider.createRefreshToken(member.getEmail(), member.getRole());
 
+        refreshTokenService.saveRefreshToken(member.getEmail(), refreshToken);
+
         Cookie accessCookie = new Cookie("accessToken", accessToken);
         accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(true); // HTTPS 환경에서만 사용
+        accessCookie.setSecure(true);
         accessCookie.setPath("/");
         accessCookie.setMaxAge(60 * 30); // 30분
-
-        Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(true);
-        refreshCookie.setPath("/");
-        refreshCookie.setMaxAge(60 * 60 * 24 * 7); // 7일
-
         response.addCookie(accessCookie);
-        response.addCookie(refreshCookie);
 
         return ResponseEntity.ok("로그인 성공");
     }
     @PostMapping("/reissue")
     public ResponseEntity<?> reissueToken(HttpServletRequest request, HttpServletResponse response) {
-        // 1. Refresh Token 쿠키에서 가져오기
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("쿠키가 없습니다.");
         }
 
-        String refreshToken = null;
+        String accessToken = null;
         for (Cookie cookie : cookies) {
-            if ("refreshToken".equals(cookie.getName())) {
-                refreshToken = cookie.getValue();
+            if ("accessToken".equals(cookie.getName())) {
+                accessToken = cookie.getValue();
                 break;
             }
         }
 
-        if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token이 유효하지 않습니다.");
+        if (accessToken == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token 없음");
         }
 
-        // 2. 새 Access Token 발급
-        String email = jwtTokenProvider.getEmail(refreshToken);
-        Role role = jwtTokenProvider.getRole(refreshToken);
+        String email = jwtTokenProvider.getEmail(accessToken);
+
+        String storedRefreshToken = refreshTokenService.getRefreshToken(email);
+
+        if (storedRefreshToken == null || !jwtTokenProvider.validateToken(storedRefreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token이 유효하지 않거나 존재하지 않음");
+        }
+
+        Role role = jwtTokenProvider.getRole(storedRefreshToken);
         String newAccessToken = jwtTokenProvider.createAccessToken(email, role);
 
         Cookie newAccessCookie = new Cookie("accessToken", newAccessToken);
@@ -105,11 +106,15 @@ public class AuthController {
         newAccessCookie.setSecure(true);
         newAccessCookie.setPath("/");
         newAccessCookie.setMaxAge(60 * 30); // 30분
-
         response.addCookie(newAccessCookie);
+
         return ResponseEntity.ok("Access Token 재발급 완료");
     }
-
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        refreshTokenService.deleteRefreshToken(userDetails.getUsername());
+        return ResponseEntity.ok("로그아웃 완료");
+    }
     @GetMapping("/me")
     public ResponseEntity<?> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Member member = userDetails.getMember(); // 또는 userDetails.getUsername(), getAuthorities() 등
