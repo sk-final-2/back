@@ -37,6 +37,8 @@ out/
 .vscode/
 
 **/application-prod.properties
+**/application-dev.properties
+
 # Compiled class file
 *.class
 
