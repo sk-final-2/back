@@ -1,4 +1,4 @@
-package com.backend.recruitAi.Email;
+package com.backend.recruitAi.email.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;

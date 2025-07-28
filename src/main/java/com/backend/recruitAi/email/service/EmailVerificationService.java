@@ -1,5 +1,7 @@
-package com.backend.recruitAi.Email;
+package com.backend.recruitAi.email.service;
 
+import com.backend.recruitAi.email.repository.EmailVerificationRepository;
+import com.backend.recruitAi.email.entity.EmailVerification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

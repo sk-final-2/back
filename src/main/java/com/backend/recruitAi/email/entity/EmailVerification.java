@@ -1,4 +1,4 @@
-package com.backend.recruitAi.Email;
+package com.backend.recruitAi.email.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

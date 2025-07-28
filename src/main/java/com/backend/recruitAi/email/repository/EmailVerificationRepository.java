@@ -1,5 +1,6 @@
-package com.backend.recruitAi.Email;
+package com.backend.recruitAi.email.repository;
 
+import com.backend.recruitAi.email.entity.EmailVerification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
