@@ -1,6 +1,8 @@
 package com.backend.recruitAi.member.controller;
 
-import com.backend.recruitAi.common.dto.ResponseDto;
+import com.backend.recruitAi.global.exception.BusinessException;
+import com.backend.recruitAi.global.exception.ErrorCode;
+import com.backend.recruitAi.global.response.ResponseDto;
 import com.backend.recruitAi.jwt.JwtTokenProvider;
 import com.backend.recruitAi.jwt.RefreshTokenService;
 import com.backend.recruitAi.member.dto.KakaoSignupRequest;
@@ -41,7 +43,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseDto<?> signup(@Valid @RequestBody SignupRequest request) {
         if (memberRepository.findByEmail(request.getEmail()).isPresent()) {
-            return ResponseDto.error(400, "해당 이메일 계정이 있습니다.", "해당 이메일 계정이 있습니다.");
+            throw new BusinessException(ErrorCode.EMAIL_DUPLICATED);
         }
 
         Member member = Member.builder()
@@ -64,10 +66,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         Member member = memberRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 일치하지 않습니다.");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         String accessToken = jwtTokenProvider.createAccessToken(member.getEmail(), member.getRole());
@@ -84,11 +86,12 @@ public class AuthController {
 
         return ResponseEntity.ok("로그인 성공");
     }
+
     @PostMapping("/reissue")
     public ResponseEntity<?> reissueToken(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("쿠키가 없습니다.");
+            throw new BusinessException(ErrorCode.COOKIE_NOT_FOUND);
         }
 
         String accessToken = null;
@@ -100,7 +103,7 @@ public class AuthController {
         }
 
         if (accessToken == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Access Token 없음");
+            throw new BusinessException(ErrorCode.ACCESS_TOKEN_NOT_FOUND);
         }
 
         String email = jwtTokenProvider.getEmail(accessToken);
@@ -108,7 +111,7 @@ public class AuthController {
         String storedRefreshToken = refreshTokenService.getRefreshToken(email);
 
         if (storedRefreshToken == null || !jwtTokenProvider.validateToken(storedRefreshToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token이 유효하지 않거나 존재하지 않음");
+            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         Role role = jwtTokenProvider.getRole(storedRefreshToken);
@@ -123,11 +126,13 @@ public class AuthController {
 
         return ResponseEntity.ok("Access Token 재발급 완료");
     }
+
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails userDetails) {
         refreshTokenService.deleteRefreshToken(userDetails.getUsername());
         return ResponseEntity.ok("로그아웃 완료");
     }
+    
     @GetMapping("/me")
     public ResponseEntity<?> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Member member = userDetails.getMember(); // 또는 userDetails.getUsername(), getAuthorities() 등

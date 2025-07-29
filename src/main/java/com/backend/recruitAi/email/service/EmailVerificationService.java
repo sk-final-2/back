@@ -2,11 +2,13 @@ package com.backend.recruitAi.email.service;
 
 import com.backend.recruitAi.email.repository.EmailVerificationRepository;
 import com.backend.recruitAi.email.entity.EmailVerification;
+import com.backend.recruitAi.global.exception.BusinessException;
+import com.backend.recruitAi.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -16,8 +18,8 @@ public class EmailVerificationService {
     private final MailService mailService;
 
     public void sendCode(String email) {
-        String code = UUID.randomUUID().toString().substring(0, 6);
-        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(5);
+        String code = String.format("%06d", new Random().nextInt(1000000));
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(3);
 
         EmailVerification ev = new EmailVerification(email, code, expiresAt, false);
         repository.save(ev);
@@ -28,16 +30,24 @@ public class EmailVerificationService {
         } catch (Exception e) {
             System.out.println("❌ 이메일 전송 실패: " + email);
             e.printStackTrace();  // 콘솔에 상세 SMTP 에러 로그 출력됨
-            throw new RuntimeException("메일 전송 중 오류가 발생했습니다.");
+            throw new BusinessException(ErrorCode.MAIL_SEND_FAILED);
         }
     }
 
     public boolean verifyCode(String email, String inputCode) {
-        EmailVerification ev = repository.findByEmailAndCode(email, inputCode)
-                .orElseThrow(() -> new IllegalArgumentException("인증 정보가 존재하지 않습니다."));
+        EmailVerification ev = repository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.EMAIL_VERIFICATION_NOT_FOUND));
 
-        if (ev.isVerified()) throw new IllegalStateException("이미 인증된 이메일입니다.");
-        if (ev.getExpiresAt().isBefore(LocalDateTime.now())) throw new IllegalStateException("코드가 만료되었습니다.");
+        if (!ev.getCode().equals(inputCode)) {
+            throw new BusinessException(ErrorCode.INVALID_VERIFICATION_CODE);
+        }
+
+        if (ev.isVerified()) {
+            throw new BusinessException(ErrorCode.EMAIL_ALREADY_VERIFIED);
+        }
+        if (ev.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new BusinessException(ErrorCode.EMAIL_CODE_EXPIRED);
+        }
 
         ev.setVerified(true);
         repository.save(ev);
