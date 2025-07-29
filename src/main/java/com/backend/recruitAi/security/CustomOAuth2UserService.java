@@ -48,6 +48,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Map<String, Object> flattenedAttributes = new HashMap<>();
         flattenedAttributes.put("email", email);
         flattenedAttributes.put("name", name);
+        flattenedAttributes.put("registrationId", registrationId); // optional: 프론트에서 구분 필요 시
 
         return memberRepository.findByEmail(email)
                 .map(member -> new DefaultOAuth2User(

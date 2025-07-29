@@ -20,28 +20,28 @@ public class OAuth2FailureHandler implements AuthenticationFailureHandler {
                                         AuthenticationException exception) {
         try {
             if (exception instanceof OAuth2RegistrationRequiredException regEx) {
-
                 System.out.println("OAuth2 로그인 실패: " + exception.getClass().getSimpleName());
-                exception.printStackTrace();
 
                 Map<String, Object> attributes = regEx.getAttributes();
 
-                Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
-                Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
-
-                String email = (String) kakaoAccount.get("email");
-                String nickname = (String) profile.get("nickname");
+                String email = (String) attributes.get("email");
+                String name = (String) attributes.get("name");
+                String registrationId = (String) attributes.get("registrationId");
 
                 String encodedEmail = URLEncoder.encode(email, StandardCharsets.UTF_8);
-                String encodedNickname = URLEncoder.encode(nickname, StandardCharsets.UTF_8);
+                String encodedName = URLEncoder.encode(name, StandardCharsets.UTF_8);
+                String encodedProvider = URLEncoder.encode(registrationId, StandardCharsets.UTF_8);
 
-                String redirectUri = "http://localhost:3000/kakao-signup?email=" + encodedEmail + "&nickname=" + encodedNickname;
+                String redirectUri = String.format(
+                        "http://localhost:3000/social-signup?email=%s&name=%s&provider=%s",
+                        encodedEmail, encodedName, encodedProvider
+                );
+
                 response.sendRedirect(redirectUri);
             } else {
                 response.sendRedirect("/login?error=true");
             }
         } catch (IOException e) {
-            // 예외 발생 시 로깅 및 fallback 처리
             e.printStackTrace();
             try {
                 response.sendRedirect("/login?error=exception");

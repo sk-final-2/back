@@ -49,6 +49,7 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private Provider provider = Provider.LOCAL;
 
     @Column(name = "provider_id", length = 255)
@@ -56,6 +57,7 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private Role role = Role.ROLE_USER;
 
     @CreationTimestamp
