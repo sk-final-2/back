@@ -1,5 +1,6 @@
 package com.backend.recruitAi.member.entity;
 
+import com.nimbusds.openid.connect.sdk.claims.Gender;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 @Builder
 @Entity
@@ -29,6 +31,21 @@ public class Member {
 
     @Column(length = 255)
     private String password;
+
+    @Column(length = 10)
+    private String postcode;
+
+    @Column(length = 255)
+    private String address1;
+
+    @Column(length = 255)
+    private String address2;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    private GenderType gender;
+
+    private LocalDate birth;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

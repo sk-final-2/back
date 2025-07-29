@@ -1,9 +1,8 @@
 package com.backend.recruitAi.security;
 
 import com.backend.recruitAi.member.entity.Member;
-import com.backend.recruitAi.member.entity.Provider;
-import com.backend.recruitAi.member.entity.Role;
 import com.backend.recruitAi.member.repository.MemberRepository;
+import com.backend.recruitAi.security.exception.OAuth2RegistrationRequiredException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -13,7 +12,9 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
@@ -25,24 +26,35 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest request) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(request);
 
-        String provider = request.getClientRegistration().getRegistrationId();
-        String providerId = oAuth2User.getName();
-        String email = oAuth2User.getAttribute("email");
-        String name = oAuth2User.getAttribute("name");
+        String registrationId = request.getClientRegistration().getRegistrationId();
+        Map<String, Object> attributes = oAuth2User.getAttributes();
 
-        Member member = memberRepository.findByEmail(email)
-                .orElseGet(() -> memberRepository.save(Member.builder()
-                    .email(email)
-                    .name(name)
-                    .provider(Provider.valueOf(provider.toUpperCase()))
-                    .providerId(providerId)
-                    .role(Role.ROLE_USER)
-                    .build()));
+        String email = null;
+        String name = null;
 
-        return new DefaultOAuth2User(
-                List.of(new SimpleGrantedAuthority(member.getRole().name())),
-                oAuth2User.getAttributes(),
-                "email"
-        );
+        if ("kakao".equals(registrationId)) {
+            Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+            Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+            email = (String) kakaoAccount.get("email");
+            name = (String) profile.get("nickname");
+        } else if ("google".equals(registrationId)) {
+            email = (String) attributes.get("email");
+            name = (String) attributes.get("name");
+        } else {
+            throw new OAuth2AuthenticationException("지원하지 않는 소셜 로그인입니다: " + registrationId);
+        }
+
+        // email, name만 있는 새로운 attribute 생성
+        Map<String, Object> flattenedAttributes = new HashMap<>();
+        flattenedAttributes.put("email", email);
+        flattenedAttributes.put("name", name);
+
+        return memberRepository.findByEmail(email)
+                .map(member -> new DefaultOAuth2User(
+                        List.of(new SimpleGrantedAuthority(member.getRole().name())),
+                        flattenedAttributes,
+                        "email"
+                ))
+                .orElseThrow(() -> new OAuth2RegistrationRequiredException("소셜 회원가입 필요", flattenedAttributes));
     }
 }
