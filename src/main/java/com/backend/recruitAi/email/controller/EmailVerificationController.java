@@ -1,11 +1,12 @@
 package com.backend.recruitAi.email.controller;
 
-import com.backend.recruitAi.common.dto.ResponseDto;
+import com.backend.recruitAi.global.exception.BusinessException;
+import com.backend.recruitAi.global.exception.ErrorCode;
+import com.backend.recruitAi.global.response.ResponseDto;
 import com.backend.recruitAi.email.service.EmailVerificationService;
 import com.backend.recruitAi.email.dto.EmailRequestDto;
 import com.backend.recruitAi.email.dto.EmailVerificationRequestDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,9 +26,11 @@ public class EmailVerificationController {
     @PostMapping("/verify")
     public ResponseDto<String> verify(@RequestBody EmailVerificationRequestDto request) {
         boolean success = verificationService.verifyCode(request.getEmail(), request.getCode());
-        return success
-                ? ResponseDto.success("인증 성공")
-                : ResponseDto.error(400,"인증 실패","인증실패");
+        if (!success) {
+            throw new BusinessException(ErrorCode.INVALID_VERIFICATION_CODE);
+        }
+
+        return ResponseDto.success("인증 성공");
     }
 }
 
