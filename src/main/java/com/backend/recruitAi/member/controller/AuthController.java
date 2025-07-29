@@ -149,7 +149,7 @@ public class AuthController {
             memberService.kakaoSignup(request);
             return ResponseDto.success("카카오 회원가입 성공");
         } catch (IllegalArgumentException e) {
-            return ResponseDto.error(400,"회원가입 실패","회원가입 실패");
+            throw new BusinessException(ErrorCode.EMAIL_VERIFICATION_NOT_FOUND);
         }
     }
 
