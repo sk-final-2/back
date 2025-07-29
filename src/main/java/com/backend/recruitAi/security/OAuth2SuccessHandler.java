@@ -1,8 +1,11 @@
 package com.backend.recruitAi.security;
 
 import com.backend.recruitAi.jwt.JwtTokenProvider;
+import com.backend.recruitAi.jwt.RefreshTokenService;
 import com.backend.recruitAi.member.entity.Member;
 import com.backend.recruitAi.member.repository.MemberRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,16 +13,24 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
-    @Autowired private MemberRepository memberRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private RefreshTokenService refreshTokenService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -32,12 +43,23 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = jwtTokenProvider.createAccessToken(email, member.getRole());
         String refreshToken = jwtTokenProvider.createRefreshToken(email, member.getRole());
 
-        // React 프론트엔드 연동 (리다이렉트 URL에 토큰 포함)
-        String redirectUri = UriComponentsBuilder.fromUriString("http://localhost:3000/oauth2/redirect")
-                .queryParam("accessToken", accessToken)
-                .queryParam("refreshToken", refreshToken)
-                .build().toUriString();
+        refreshTokenService.saveRefreshToken(email, refreshToken);
 
-        response.sendRedirect(redirectUri);
+        Cookie accessCookie = new Cookie("accessToken", accessToken);
+        accessCookie.setHttpOnly(true);
+        accessCookie.setSecure(true);
+        accessCookie.setPath("/");
+        accessCookie.setMaxAge(60 * 30); // 30분
+        response.addCookie(accessCookie);
+        
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("message", "소셜 로그인 성공");
+        responseBody.put("email", email);
+        responseBody.put("name", member.getName());
+
+        response.getWriter().write(objectMapper.writeValueAsString(responseBody));
     }
 }

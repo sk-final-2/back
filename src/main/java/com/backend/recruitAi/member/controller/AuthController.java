@@ -5,16 +5,20 @@ import com.backend.recruitAi.global.exception.ErrorCode;
 import com.backend.recruitAi.global.response.ResponseDto;
 import com.backend.recruitAi.jwt.JwtTokenProvider;
 import com.backend.recruitAi.jwt.RefreshTokenService;
+import com.backend.recruitAi.member.dto.KakaoSignupRequest;
 import com.backend.recruitAi.member.dto.LoginRequest;
 import com.backend.recruitAi.member.dto.SignupRequest;
+
 import com.backend.recruitAi.member.entity.Member;
 import com.backend.recruitAi.member.entity.Provider;
 import com.backend.recruitAi.member.entity.Role;
 import com.backend.recruitAi.member.repository.MemberRepository;
 import com.backend.recruitAi.member.service.CustomUserDetails;
+import com.backend.recruitAi.member.service.MemberService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +27,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 @RestController
@@ -33,21 +38,28 @@ public class AuthController {
     @Autowired private MemberRepository memberRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private JwtTokenProvider jwtTokenProvider;
+    @Autowired private MemberService memberService;
 
     @PostMapping("/signup")
-    public ResponseDto<?> signup(@RequestBody SignupRequest request) {
+    public ResponseDto<?> signup(@Valid @RequestBody SignupRequest request) {
         if (memberRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new BusinessException(ErrorCode.EMAIL_DUPLICATED);
         }
 
-        Member member = new Member();
-        member.setEmail(request.getEmail());
-        member.setPassword(passwordEncoder.encode(request.getPassword()));
-        member.setName(request.getName());
-        member.setProvider(Provider.LOCAL);
-        member.setRole(Role.ROLE_USER);
-        memberRepository.save(member);
+        Member member = Member.builder()
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .name(request.getName())
+                .provider(Provider.LOCAL)
+                .role(Role.ROLE_USER)
+                .postcode(request.getZipcode())
+                .address1(request.getAddress1())
+                .address2(request.getAddress2())
+                .gender(request.getGender())
+                .birth(request.getBirth())
+                .build();
 
+        memberRepository.save(member);
         return ResponseDto.success("회원가입 성공");
     }
 
@@ -130,4 +142,15 @@ public class AuthController {
                 "role", member.getRole()
         ));
     }
+
+    @PostMapping("/kakao-signup")
+    public ResponseDto<String> kakaoSignup(@Valid @RequestBody KakaoSignupRequest request) {
+        try {
+            memberService.kakaoSignup(request);
+            return ResponseDto.success("카카오 회원가입 성공");
+        } catch (IllegalArgumentException e) {
+            return ResponseDto.error(400,"회원가입 실패","회원가입 실패");
+        }
+    }
+
 }
