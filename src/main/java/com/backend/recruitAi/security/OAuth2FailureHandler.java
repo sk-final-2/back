@@ -33,7 +33,7 @@ public class OAuth2FailureHandler implements AuthenticationFailureHandler {
                 String encodedProvider = URLEncoder.encode(registrationId, StandardCharsets.UTF_8);
 
                 String redirectUri = String.format(
-                        "http://localhost:3000/social-signup?email=%s&name=%s&provider=%s",
+                        "http://localhost:3000/kakao-signup?email=%s&name=%s&provider=%s",
                         encodedEmail, encodedName, encodedProvider
                 );
 
