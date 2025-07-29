@@ -1,0 +1,13 @@
+]__pycache__/
+ *.pyc
+ *.pyo
+ *.pyd
+ node_modules
+ build
+ dist
+ .env
+ .git
+ .gitignore
+ Dockerfile
+ docker-compose.yml
+ *.env

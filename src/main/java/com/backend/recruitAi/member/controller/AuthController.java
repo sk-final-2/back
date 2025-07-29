@@ -1,5 +1,6 @@
 package com.backend.recruitAi.member.controller;
 
+import com.backend.recruitAi.common.dto.ResponseDto;
 import com.backend.recruitAi.jwt.JwtTokenProvider;
 import com.backend.recruitAi.jwt.RefreshTokenService;
 import com.backend.recruitAi.member.dto.LoginRequest;
@@ -32,9 +33,9 @@ public class AuthController {
     @Autowired private JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody SignupRequest request) {
+    public ResponseDto<?> signup(@RequestBody SignupRequest request) {
         if (memberRepository.findByEmail(request.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("이미 존재하는 이메일입니다.");
+            return ResponseDto.error(400,"해당 이메일 계정이 있습니다.","해당 이메일 계정이 있습니다.");
         }
 
         Member member = new Member();
@@ -45,7 +46,7 @@ public class AuthController {
         member.setRole(Role.ROLE_USER);
         memberRepository.save(member);
 
-        return ResponseEntity.ok("회원가입 성공");
+        return ResponseDto.success("회원가입 성공");
     }
 
     @PostMapping("/login")
