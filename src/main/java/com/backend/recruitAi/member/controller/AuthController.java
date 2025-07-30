@@ -5,6 +5,7 @@ import com.backend.recruitAi.global.exception.ErrorCode;
 import com.backend.recruitAi.global.response.ResponseDto;
 import com.backend.recruitAi.jwt.JwtTokenProvider;
 import com.backend.recruitAi.jwt.RefreshTokenService;
+import com.backend.recruitAi.member.dto.GoogleSignupRequest;
 import com.backend.recruitAi.member.dto.KakaoSignupRequest;
 import com.backend.recruitAi.member.dto.LoginRequest;
 import com.backend.recruitAi.member.dto.SignupRequest;
@@ -148,6 +149,15 @@ public class AuthController {
         try {
             memberService.kakaoSignup(request);
             return ResponseDto.success("카카오 회원가입 성공");
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException(ErrorCode.EMAIL_VERIFICATION_NOT_FOUND);
+        }
+    }
+    @PostMapping("/google-signup")
+    public ResponseDto<String> googleSignup(@Valid @RequestBody GoogleSignupRequest request) {
+        try {
+            memberService.googleSignup(request);
+            return ResponseDto.success("google 회원가입 성공");
         } catch (IllegalArgumentException e) {
             throw new BusinessException(ErrorCode.EMAIL_VERIFICATION_NOT_FOUND);
         }

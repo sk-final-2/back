@@ -40,6 +40,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         } else if ("google".equals(registrationId)) {
             email = (String) attributes.get("email");
             name = (String) attributes.get("name");
+            System.out.println(email+"googogogoo");
+            System.out.println(name+"gogogogogo");
         } else {
             throw new OAuth2AuthenticationException("지원하지 않는 소셜 로그인입니다: " + registrationId);
         }

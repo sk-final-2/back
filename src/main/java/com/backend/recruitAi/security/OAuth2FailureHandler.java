@@ -3,6 +3,7 @@ package com.backend.recruitAi.security;
 import com.backend.recruitAi.security.exception.OAuth2RegistrationRequiredException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
@@ -14,7 +15,8 @@ import java.util.Map;
 
 @Component
 public class OAuth2FailureHandler implements AuthenticationFailureHandler {
-
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) {
@@ -32,11 +34,19 @@ public class OAuth2FailureHandler implements AuthenticationFailureHandler {
                 String encodedName = URLEncoder.encode(name, StandardCharsets.UTF_8);
                 String encodedProvider = URLEncoder.encode(registrationId, StandardCharsets.UTF_8);
 
-                String redirectUri = String.format(
-                        "http://localhost:3000/kakao-signup?email=%s&name=%s&provider=%s",
-                        encodedEmail, encodedName, encodedProvider
-                );
+                String redirectPath;
+                if ("kakao".equalsIgnoreCase(registrationId)) {
+                    redirectPath = "kakao-signup";
+                } else if ("google".equalsIgnoreCase(registrationId)) {
+                    redirectPath = "google-signup";
+                } else {
+                    redirectPath = "social-signup";
+                }
 
+                String redirectUri = String.format(
+                        "%s/%s?email=%s&name=%s&provider=%s",
+                        frontendUrl, redirectPath, encodedEmail, encodedName, encodedProvider
+                );
                 response.sendRedirect(redirectUri);
             } else {
                 response.sendRedirect("/login?error=true");
