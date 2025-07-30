@@ -9,6 +9,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -30,7 +31,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     @Autowired
     private RefreshTokenService refreshTokenService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -51,15 +53,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         accessCookie.setPath("/");
         accessCookie.setMaxAge(60 * 30); // 30분
         response.addCookie(accessCookie);
-        
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
 
-        Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("message", "소셜 로그인 성공");
-        responseBody.put("email", email);
-        responseBody.put("name", member.getName());
-
-        response.getWriter().write(objectMapper.writeValueAsString(responseBody));
+        String redirectUri = String.format("%s/", frontendUrl);
+        response.sendRedirect(redirectUri);
     }
 }
