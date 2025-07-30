@@ -1,5 +1,6 @@
 package com.backend.recruitAi.video.controller;
 
+import com.backend.recruitAi.config.SttServerProperties;
 import com.backend.recruitAi.global.exception.ErrorCode;
 import com.backend.recruitAi.global.response.ResponseDto; // ResponseDto 클래스의 정확한 경로
 import com.backend.recruitAi.member.repository.MemberRepository; // MemberRepository 인터페이스의 정확한 경로
@@ -7,9 +8,7 @@ import com.backend.recruitAi.member.service.CustomUserDetails; // CustomUserDeta
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal; // Spring Security 관련 임포트
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -26,8 +25,8 @@ import java.io.IOException;
 @RequestMapping("/api/video")
 public class VideoStreamController {
 
-    private final WebClient webClient;
     private final MemberRepository memberRepository;
+    private final SttServerProperties sttServerProperties;
 
     @PostMapping("/upload-and-forward")
     public ResponseDto<String> uploadAndForwardVideo(
@@ -55,11 +54,10 @@ public class VideoStreamController {
             MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
             formData.add("file", resource);
 
-            // TODO: 아래 URL을 STT 서버의 실제 IP 주소, 포트, 엔드포인트에 맞춰 정확하게 수정해주세요.
-            String sttServerUrl = ""; // <--- 이 부분을 실제 STT 서버 URL로 변경!
+            WebClient webClient = WebClient.create();
 
             String pythonResponse = webClient.post()
-                    .uri(sttServerUrl)
+                    .uri(sttServerProperties.getUrl())
                     .header("X-User-Email", userEmail)
                     .header("X-Member-Id", String.valueOf(memberId))
                     .contentType(MediaType.MULTIPART_FORM_DATA)
