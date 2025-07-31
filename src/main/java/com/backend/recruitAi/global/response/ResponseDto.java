@@ -23,6 +23,16 @@ public class ResponseDto<T> {
                 .build();
     }
 
+    //OCR 성공 응답 (data를 같이 넘기는 구조)
+    public static <T> ResponseDto<T> success(String message, T data) {
+        return ResponseDto.<T>builder()
+                .status(HttpStatus.OK.value())
+                .code("SUCCESS")
+                .message(message)
+                .data(data)
+                .build();
+    }
+
     // 실패 응답
     public static <T> ResponseDto<T> error(ErrorCode errorCode) {
         return ResponseDto.<T>builder()
