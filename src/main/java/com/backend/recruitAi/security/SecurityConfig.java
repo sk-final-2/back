@@ -42,8 +42,7 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/oauth2/**",
                                 "/api/email/**",
-                                "/api/interview/ocr",
-                                "/api/interview/first-question",
+                                "/api/interview/**",
                                 "/", // 루트 페이지
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",

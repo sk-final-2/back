@@ -27,6 +27,7 @@ public enum ErrorCode {
     // File/IO Errors (파일/입출력 오류)
     FILE_PROCESSING_ERROR(500, "FILE001", "파일 처리 중 오류가 발생했습니다."),
     FILE_NOT_FOUND(404, "FILE002", "파일을 찾을 수 없습니다."),
+    NOT_FOUND(404, "COMMON002", "요청한 리소스를 찾을 수 없습니다."),
 
     // STT Service Errors (STT 서비스 오류)
     STT_SERVICE_UNAVAILABLE(503, "STT001", "STT 서비스가 현재 이용 불가능합니다."),
