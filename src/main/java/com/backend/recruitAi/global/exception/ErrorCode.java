@@ -38,8 +38,18 @@ public enum ErrorCode {
     //OCR 오류
     FILE_PROCESSING_FAILED(500, "FILE001", "파일 처리 중 오류가 발생했습니다."),
 
+    // 첫 번째 질문 생성 오류
+    FIRST_QUESTION_FAILED(500, "QUESTION001", "첫 번째 질문 처리 중 오류가 발생했습니다."),
+
     // 서버 오류
-    INTERNAL_SERVER_ERROR(500, "COMMON001", "서버 오류입니다.");
+    INTERNAL_SERVER_ERROR(500, "COMMON001", "서버 오류입니다."),
+
+    // 인터뷰 관련
+    INTERVIEW_RESULT_NOT_FOUND(404, "RESULT001", "인터뷰 결과를 찾을 수 없습니다."),
+    ANSWER_ANALYSIS_NOT_FOUND(404, "RESULT002", "답변 분석 결과를 찾을 수 없습니다."),
+    NO_AUTHORITY(403, "AUTH006", "해당 작업을 수행할 권한이 없습니다."),
+    MEMBER_NOT_FOUND(204, "COMMON002", "조회할 내용이 없습니다.");
+
 
     private final int status;
     private final String code;

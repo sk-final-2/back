@@ -6,6 +6,10 @@ import com.backend.recruitAi.global.response.ResponseDto;
 import com.backend.recruitAi.interview.dto.AnswerResponseDto;
 import com.backend.recruitAi.interview.dto.OcrResponseDto;
 import com.backend.recruitAi.interview.service.EmotionService;
+import com.backend.recruitAi.interview.dto.FirstQuestionRequestDto;
+import com.backend.recruitAi.interview.dto.FirstQuestionResponseDto;
+import com.backend.recruitAi.interview.dto.OcrResponseDto;
+import com.backend.recruitAi.interview.service.FirstQuestionService;
 import com.backend.recruitAi.interview.service.OcrService;
 import com.backend.recruitAi.interview.service.RedisInterviewService;
 import com.backend.recruitAi.interview.service.SttService;
@@ -31,6 +35,8 @@ public class InterviewController {
     private final SttService sttService;
     private final EmotionService emotionService;
     private final RedisInterviewService redisInterviewService;
+    private final FirstQuestionService firstQuestionService;
+
     @PostMapping("/ocr")
     public ResponseDto<OcrResponseDto> ocrFromFile(@RequestPart("file") MultipartFile file) {
         try {
@@ -95,4 +101,10 @@ public class InterviewController {
         }
     }
 
+    @PostMapping("/first-question")
+    public ResponseDto<FirstQuestionResponseDto> getFirstQuestion(
+            @RequestBody FirstQuestionRequestDto request) {
+        FirstQuestionResponseDto response = firstQuestionService.handleFirstQuestion(request);
+        return ResponseDto.success("첫 번째 질문 생성 성공", response);
+    }
 }
