@@ -3,7 +3,10 @@ package com.backend.recruitAi.interview.controller;
 import com.backend.recruitAi.global.exception.BusinessException;
 import com.backend.recruitAi.global.exception.ErrorCode;
 import com.backend.recruitAi.global.response.ResponseDto;
+import com.backend.recruitAi.interview.dto.FirstQuestionRequestDto;
+import com.backend.recruitAi.interview.dto.FirstQuestionResponseDto;
 import com.backend.recruitAi.interview.dto.OcrResponseDto;
+import com.backend.recruitAi.interview.service.FirstQuestionService;
 import com.backend.recruitAi.interview.service.OcrService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +21,7 @@ import java.io.IOException;
 public class InterviewController {
 
     private final OcrService ocrService;
+    private final FirstQuestionService firstQuestionService;
 
     @PostMapping("/ocr")
     public ResponseDto<OcrResponseDto> ocrFromFile(@RequestPart("file") MultipartFile file) {
@@ -33,5 +37,12 @@ public class InterviewController {
         } catch (IOException e) {
             throw new BusinessException(ErrorCode.FILE_PROCESSING_FAILED);
         }
+    }
+
+    @PostMapping("/first-question")
+    public ResponseDto<FirstQuestionResponseDto> getFirstQuestion(
+            @RequestBody FirstQuestionRequestDto request) {
+        FirstQuestionResponseDto response = firstQuestionService.handleFirstQuestion(request);
+        return ResponseDto.success("첫 번째 질문 생성 성공", response);
     }
 }
