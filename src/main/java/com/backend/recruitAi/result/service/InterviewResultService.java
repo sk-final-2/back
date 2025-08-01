@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 public class InterviewResultService {
 
     private final InterviewResultRepository interviewResultRepository;
-    private final MemberRepository memberRepository; // MemberRepository 주입
-    private final AnswerAnalysisRepository answerAnalysisRepository; // AnswerAnalysisRepository 주입
+    private final MemberRepository memberRepository;
+    private final AnswerAnalysisRepository answerAnalysisRepository;
 
     // 새로운 인터뷰 결과 저장 (컨트롤러에서 DTO를 받아 처리)
     @Transactional

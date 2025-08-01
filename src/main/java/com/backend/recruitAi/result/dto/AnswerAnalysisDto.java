@@ -33,7 +33,6 @@ public class AnswerAnalysisDto {
     @NotNull(message = "감정 점수는 필수입니다.")
     private int emotion;
 
-    @NotNull(message = "시선처리 점수는 필수입니다.")
     private int tracking;
 
     public static AnswerAnalysisDto fromEntity(AnswerAnalysis entity) {
