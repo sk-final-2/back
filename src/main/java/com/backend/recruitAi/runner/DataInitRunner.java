@@ -74,6 +74,7 @@ public class DataInitRunner implements CommandLineRunner {
                     .build());
 
             System.out.println("✅ 샘플 멤버 4명(카카오 포함) 초기화 완료");
+
         }
     }
 }

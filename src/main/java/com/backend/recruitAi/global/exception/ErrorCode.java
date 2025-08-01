@@ -34,6 +34,7 @@ public enum ErrorCode {
     STT_UNSUPPORTED_MEDIA_TYPE(415, "STT004", "STT 서비스가 지원하지 않는 미디어 타입입니다."),
 
     // 서버 오류
+    NOT_FOUND(404, "COMMON002", "요청하신 리소스를 찾을 수 없습니다."), // 추가
     INTERNAL_SERVER_ERROR(500, "COMMON001", "서버 오류입니다.");
 
     private final int status;
