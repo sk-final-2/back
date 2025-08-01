@@ -24,32 +24,20 @@ public enum ErrorCode {
     EMAIL_CODE_EXPIRED(400, "EMAIL005", "이메일 인증 코드가 만료되었습니다."),
     MAIL_SEND_FAILED(500, "EMAIL006", "이메일 전송 중 오류가 발생했습니다."),
 
-    // File/IO Errors (파일/입출력 오류)
-    FILE_PROCESSING_ERROR(500, "FILE001", "파일 처리 중 오류가 발생했습니다."),
-    FILE_NOT_FOUND(404, "FILE002", "파일을 찾을 수 없습니다."),
-    NOT_FOUND(404, "COMMON002", "요청한 리소스를 찾을 수 없습니다."),
-
-    // STT Service Errors (STT 서비스 오류)
-    STT_SERVICE_UNAVAILABLE(503, "STT001", "STT 서비스가 현재 이용 불가능합니다."),
-    STT_SERVICE_BAD_REQUEST(400, "STT002", "STT 서비스로의 요청이 올바르지 않습니다."),
-    STT_PROCESSING_FAILED(500, "STT003", "STT 서버에서 음성 변환에 실패했습니다."),
-    STT_UNSUPPORTED_MEDIA_TYPE(415, "STT004", "STT 서비스가 지원하지 않는 미디어 타입입니다."),
-
     //OCR 오류
     FILE_PROCESSING_FAILED(500, "FILE001", "파일 처리 중 오류가 발생했습니다."),
 
     // 첫 번째 질문 생성 오류
     FIRST_QUESTION_FAILED(500, "QUESTION001", "첫 번째 질문 처리 중 오류가 발생했습니다."),
 
-    // 서버 오류
-    INTERNAL_SERVER_ERROR(500, "COMMON001", "서버 오류입니다."),
-
     // 인터뷰 관련
     INTERVIEW_RESULT_NOT_FOUND(404, "RESULT001", "인터뷰 결과를 찾을 수 없습니다."),
     ANSWER_ANALYSIS_NOT_FOUND(404, "RESULT002", "답변 분석 결과를 찾을 수 없습니다."),
     NO_AUTHORITY(403, "AUTH006", "해당 작업을 수행할 권한이 없습니다."),
-    MEMBER_NOT_FOUND(204, "COMMON002", "조회할 내용이 없습니다.");
+    MEMBER_NOT_FOUND(204, "COMMON002", "조회할 내용이 없습니다."),
 
+    // 서버 오류
+    INTERNAL_SERVER_ERROR(500, "COMMON001", "서버 오류입니다.");
 
     private final int status;
     private final String code;
