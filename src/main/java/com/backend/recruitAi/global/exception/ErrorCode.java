@@ -37,6 +37,9 @@ public enum ErrorCode {
     //OCR 오류
     FILE_PROCESSING_FAILED(500, "FILE001", "파일 처리 중 오류가 발생했습니다."),
 
+    // 첫 번째 질문 생성 오류
+    FIRST_QUESTION_FAILED(500, "QUESTION001", "첫 번째 질문 처리 중 오류가 발생했습니다."),
+
     // 서버 오류
     INTERNAL_SERVER_ERROR(500, "COMMON001", "서버 오류입니다.");
 
