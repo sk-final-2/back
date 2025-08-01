@@ -57,7 +57,7 @@ public class InterviewController {
     public ResponseDto<AnswerResponseDto> handleAnswer(
             @RequestParam("file") MultipartFile file,
             @RequestParam("seq") int seq,
-            @RequestParam("interviewId") Long interviewId,
+            @RequestParam("interviewId") String interviewId,
             @RequestParam("question") String question,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 

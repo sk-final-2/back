@@ -24,7 +24,7 @@ public class SttService {
 
     private final WebClient webClient;
 
-    public Mono<Map<String, Object>> sendToSttServer(File file, Long interviewId, int seq) {
+    public Mono<Map<String, Object>> sendToSttServer(File file, String interviewId, int seq) {
         FileSystemResource resource = new FileSystemResource(file);
 
         MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
