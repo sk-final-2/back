@@ -2,6 +2,7 @@ package com.backend.recruitAi.global.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
@@ -32,6 +33,12 @@ public enum ErrorCode {
     STT_SERVICE_BAD_REQUEST(400, "STT002", "STT 서비스로의 요청이 올바르지 않습니다."),
     STT_PROCESSING_FAILED(500, "STT003", "STT 서버에서 음성 변환에 실패했습니다."),
     STT_UNSUPPORTED_MEDIA_TYPE(415, "STT004", "STT 서비스가 지원하지 않는 미디어 타입입니다."),
+
+    //OCR 오류
+    FILE_PROCESSING_FAILED(500, "FILE001", "파일 처리 중 오류가 발생했습니다."),
+
+    // 첫 번째 질문 생성 오류
+    FIRST_QUESTION_FAILED(500, "QUESTION001", "첫 번째 질문 처리 중 오류가 발생했습니다."),
 
     // 서버 오류
     INTERNAL_SERVER_ERROR(500, "COMMON001", "서버 오류입니다."),
