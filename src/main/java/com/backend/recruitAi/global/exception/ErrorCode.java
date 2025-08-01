@@ -34,8 +34,14 @@ public enum ErrorCode {
     STT_UNSUPPORTED_MEDIA_TYPE(415, "STT004", "STT 서비스가 지원하지 않는 미디어 타입입니다."),
 
     // 서버 오류
-    NOT_FOUND(404, "COMMON002", "요청하신 리소스를 찾을 수 없습니다."), // 추가
-    INTERNAL_SERVER_ERROR(500, "COMMON001", "서버 오류입니다.");
+    INTERNAL_SERVER_ERROR(500, "COMMON001", "서버 오류입니다."),
+
+    // 인터뷰 관련
+    INTERVIEW_RESULT_NOT_FOUND(404, "RESULT001", "인터뷰 결과를 찾을 수 없습니다."),
+    ANSWER_ANALYSIS_NOT_FOUND(404, "RESULT002", "답변 분석 결과를 찾을 수 없습니다."),
+    NO_AUTHORITY(403, "AUTH006", "해당 작업을 수행할 권한이 없습니다."),
+    MEMBER_NOT_FOUND(204, "COMMON002", "조회할 내용이 없습니다.");
+
 
     private final int status;
     private final String code;
