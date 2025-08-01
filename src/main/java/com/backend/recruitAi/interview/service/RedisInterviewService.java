@@ -13,7 +13,7 @@ public class RedisInterviewService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    public void savePartialSTT(Long interviewId, int seq, Map<String, Object> stt, String question) {
+    public void savePartialSTT(String interviewId, int seq, Map<String, Object> stt, String question) {
         String key = "interview:" + interviewId + ":seq:" + seq;
 
         Map<String, Object> value = Map.of(
@@ -28,7 +28,7 @@ public class RedisInterviewService {
     }
 
 
-    public void savePartialEmotion(Long interviewId, int seq, Map<String, Object> emotion) {
+    public void savePartialEmotion(String interviewId, int seq, Map<String, Object> emotion) {
         String key = "interview:" + interviewId + ":seq:" + seq;
         redisTemplate.opsForHash().put(key, "emotionScore", emotion.get("score"));
     }

@@ -24,7 +24,7 @@ public class EmotionService {
 
     private final WebClient webClient;
 
-    public Mono<Map<String, Object>> sendToEmotionServer(File file, Long interviewId, int seq) {
+    public Mono<Map<String, Object>> sendToEmotionServer(File file, String interviewId, int seq) {
         FileSystemResource resource = new FileSystemResource(file);
 
         MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
