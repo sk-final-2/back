@@ -48,6 +48,7 @@ public class FirstQuestionService {
                     .type(request.getInterviewType())
                     .level(request.getLevel())
                     .language(request.getLanguage())
+                    .count(request.getCount())
                     .build();
 
             interviewRepository.save(interview);
@@ -57,6 +58,7 @@ public class FirstQuestionService {
                     request.getOcrText(),
                     request.getJob(),
                     interviewId,
+                    request.getCount(),
                     request.getSeq(),
                     request.getCareer(),        // 경력
                     request.getInterviewType(), // 면접 유형

@@ -54,6 +54,9 @@ public class Interview {
     @Column(name = "language", nullable = false)
     private Language language; // KOREAN / ENGLISH
 
+    @Column(name = "count", nullable = false)
+    private Integer count; // 질문 개수
+
     @Builder.Default
     @OneToMany(mappedBy = "interview", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<InterviewResult> answerAnalyses = new ArrayList<>();
