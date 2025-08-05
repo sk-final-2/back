@@ -16,6 +16,8 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,7 +56,22 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         accessCookie.setMaxAge(60 * 30); // 30분
         response.addCookie(accessCookie);
 
-        String redirectUri = String.format("%s/", frontendUrl);
+        String redirectUri = String.format(
+                "%s/oauth/success?email=%s&provider=%s&name=%s",
+                frontendUrl,
+                encode(email),
+                encode(member.getProvider().toString()),
+                encode(member.getName())
+        );
+
         response.sendRedirect(redirectUri);
+    }
+
+    private String encode(String value) {
+        try {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
+        } catch (Exception e) {
+            return "";
+        }
     }
 }

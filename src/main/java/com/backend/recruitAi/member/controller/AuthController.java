@@ -5,10 +5,7 @@ import com.backend.recruitAi.global.exception.ErrorCode;
 import com.backend.recruitAi.global.response.ResponseDto;
 import com.backend.recruitAi.jwt.JwtTokenProvider;
 import com.backend.recruitAi.jwt.RefreshTokenService;
-import com.backend.recruitAi.member.dto.GoogleSignupRequest;
-import com.backend.recruitAi.member.dto.KakaoSignupRequest;
-import com.backend.recruitAi.member.dto.LoginRequest;
-import com.backend.recruitAi.member.dto.SignupRequest;
+import com.backend.recruitAi.member.dto.*;
 
 import com.backend.recruitAi.member.entity.Member;
 import com.backend.recruitAi.member.entity.Provider;
@@ -65,7 +62,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseDto<LoginResponseDto> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         Member member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
@@ -85,11 +82,13 @@ public class AuthController {
         accessCookie.setMaxAge(60 * 30); // 30분
         response.addCookie(accessCookie);
 
-        return ResponseEntity.ok("로그인 성공");
+        LoginResponseDto loginResponseDto = new LoginResponseDto(member);
+
+        return ResponseDto.success(loginResponseDto);
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<?> reissueToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseDto<?> reissueToken(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
             throw new BusinessException(ErrorCode.COOKIE_NOT_FOUND);
@@ -125,19 +124,19 @@ public class AuthController {
         newAccessCookie.setMaxAge(60 * 30); // 30분
         response.addCookie(newAccessCookie);
 
-        return ResponseEntity.ok("Access Token 재발급 완료");
+        return ResponseDto.success("Access Token 재발급 완료");
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseDto<?> logout(@AuthenticationPrincipal CustomUserDetails userDetails) {
         refreshTokenService.deleteRefreshToken(userDetails.getUsername());
-        return ResponseEntity.ok("로그아웃 완료");
+        return ResponseDto.success("로그아웃 완료");
     }
     
     @GetMapping("/me")
-    public ResponseEntity<?> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseDto<?> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Member member = userDetails.getMember(); // 또는 userDetails.getUsername(), getAuthorities() 등
-        return ResponseEntity.ok(Map.of(
+        return ResponseDto.success(Map.of(
                 "email", member.getEmail(),
                 "name", member.getName(),
                 "role", member.getRole()
