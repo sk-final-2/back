@@ -94,6 +94,7 @@ public class DataInitRunner implements CommandLineRunner {
                     .type(InterviewType.PERSONALITY)
                     .level(Level.중)
                     .language(Language.KOREAN)
+                    .count(3)
                     .build();
 
             InterviewResult answer1_1 = InterviewResult.builder()
@@ -134,6 +135,7 @@ public class DataInitRunner implements CommandLineRunner {
                     .type(InterviewType.MIXED)
                     .level(Level.상)
                     .language(Language.KOREAN)
+                    .count(0)
                     .build();
 
             InterviewResult answer2_1 = InterviewResult.builder()

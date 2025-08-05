@@ -15,6 +15,7 @@ public class FirstAskPythonRequestDto {
     private String text;        // OCR 텍스트
     private String job;         // 직무
     private String interviewId; // UUID
+    private int count;          // 질문 개수
     private int seq;            // 질문 순서
     private String career;    // 경력 (예: "신입", "경력 1년차")
     private InterviewType interviewType; // PERSONALITY, TECHNICAL, MIXED

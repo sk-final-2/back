@@ -25,6 +25,7 @@ public class InterviewResponseDto {
     private String type;
     private String level;
     private String language;
+    private Integer count;
     private List<InterviewResultDto> answerAnalyses;
 
     public static InterviewResponseDto fromEntity(Interview entity) {
@@ -42,6 +43,7 @@ public class InterviewResponseDto {
                 .type(entity.getType() != null ? entity.getType().name() : null)
                 .level(entity.getLevel() != null ? entity.getLevel().name() : null)
                 .language(entity.getLanguage() != null ? entity.getLanguage().name() : null)
+                .count(entity.getCount())
                 .answerAnalyses(analysisDtos)
                 .build();
     }
