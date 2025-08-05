@@ -43,6 +43,8 @@ public class SecurityConfig {
                                 "/oauth2/**",
                                 "/api/email/**",
                                 "/api/interview/**",
+                                "/api/interview-results/**",
+                                "/api/answer-analyses/**",
                                 "/", // 루트 페이지
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",

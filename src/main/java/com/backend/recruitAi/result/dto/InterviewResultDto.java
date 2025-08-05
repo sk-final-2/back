@@ -1,6 +1,6 @@
 package com.backend.recruitAi.result.dto;
 
-import com.backend.recruitAi.result.entity.AnswerAnalysis;
+import com.backend.recruitAi.result.entity.InterviewResult;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AnswerAnalysisDto {
+public class InterviewResultDto {
     private Long id;
 
     @NotNull(message = "순번은 필수입니다.")
@@ -30,21 +30,31 @@ public class AnswerAnalysisDto {
     @NotBlank(message = "못한 점은 필수입니다.")
     private String bad;
 
+    @NotNull(message = "총 점수는 필수입니다.")
+    private int score;
+
     @NotNull(message = "감정 점수는 필수입니다.")
-    private int emotion;
+    private int emotionScore;
 
-    private int tracking;
+    private String emotionText;
 
-    public static AnswerAnalysisDto fromEntity(AnswerAnalysis entity) {
-        return AnswerAnalysisDto.builder()
+    private Integer trackingScore;
+
+    private String trackingText;
+
+    public static InterviewResultDto fromEntity(InterviewResult entity) {
+        return InterviewResultDto.builder()
                 .id(entity.getId())
                 .seq(entity.getSeq())
                 .question(entity.getQuestion())
                 .answer(entity.getAnswer())
                 .good(entity.getGood())
                 .bad(entity.getBad())
-                .emotion(entity.getEmotion())
-                .tracking(entity.getTracking())
+                .score(entity.getScore())
+                .emotionScore(entity.getEmotion_score())
+                .emotionText(entity.getEmotion_text())
+                .trackingScore(entity.getTracking_score())
+                .trackingText(entity.getTracking_text())
                 .build();
     }
 }

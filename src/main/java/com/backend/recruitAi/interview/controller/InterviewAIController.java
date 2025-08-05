@@ -8,7 +8,6 @@ import com.backend.recruitAi.interview.dto.OcrResponseDto;
 import com.backend.recruitAi.interview.service.EmotionService;
 import com.backend.recruitAi.interview.dto.FirstQuestionRequestDto;
 import com.backend.recruitAi.interview.dto.FirstQuestionResponseDto;
-import com.backend.recruitAi.interview.dto.OcrResponseDto;
 import com.backend.recruitAi.interview.service.FirstQuestionService;
 import com.backend.recruitAi.interview.service.OcrService;
 import com.backend.recruitAi.interview.service.RedisInterviewService;
@@ -29,7 +28,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/interview")
-public class InterviewController {
+public class InterviewAIController {
 
     private final OcrService ocrService;
     private final SttService sttService;
@@ -103,8 +102,12 @@ public class InterviewController {
 
     @PostMapping("/first-question")
     public ResponseDto<FirstQuestionResponseDto> getFirstQuestion(
-            @RequestBody FirstQuestionRequestDto request) {
-        FirstQuestionResponseDto response = firstQuestionService.handleFirstQuestion(request);
+            @RequestBody FirstQuestionRequestDto request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        FirstQuestionResponseDto response = firstQuestionService.handleFirstQuestion(
+                request,
+                userDetails.getMember().getId()
+        );
         return ResponseDto.success("첫 번째 질문 생성 성공", response);
     }
 }
