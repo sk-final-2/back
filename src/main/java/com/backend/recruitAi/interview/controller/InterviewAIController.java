@@ -102,8 +102,12 @@ public class InterviewAIController {
 
     @PostMapping("/first-question")
     public ResponseDto<FirstQuestionResponseDto> getFirstQuestion(
-            @RequestBody FirstQuestionRequestDto request) {
-        FirstQuestionResponseDto response = firstQuestionService.handleFirstQuestion(request);
+            @RequestBody FirstQuestionRequestDto request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        FirstQuestionResponseDto response = firstQuestionService.handleFirstQuestion(
+                request,
+                userDetails.getMember().getId()
+        );
         return ResponseDto.success("첫 번째 질문 생성 성공", response);
     }
 }
