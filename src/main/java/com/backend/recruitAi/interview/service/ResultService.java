@@ -68,6 +68,12 @@ public class ResultService {
         // DB 저장
         interviewResultRepository.saveAll(results);
 
+        // Redis 데이터 정리
+        for (int i = 1; i <= lastSeq; i++) {
+            redisTemplate.delete(baseKey + ":seq:" + i);
+        }
+        redisTemplate.delete(baseKey + ":lastSeq");
+
         // 응답 DTO 반환
         return InterviewResponseDto.fromEntity(interview);
     }
