@@ -119,9 +119,10 @@ public class InterviewAIController {
         redisTemplate.expire("interview:" + interviewEndRequestDto.getInterviewId() + ":lastSeq", Duration.ofHours(1));
         redisInterviewService.tryPublishIfComplete(interviewEndRequestDto.getInterviewId());
         return ResponseDto.success("면접 종료. 분석 대기 중");
+
     }
     @PostMapping("/result")
-    public ResponseDto<?> getInterviewResult(@RequestBody InterviewEndRequestDto interviewEndRequestDto, @AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseDto<InterviewResponseDto> getInterviewResult(@RequestBody InterviewEndRequestDto interviewEndRequestDto, @AuthenticationPrincipal CustomUserDetails userDetails){
         InterviewResponseDto interviewResponseDto = resultService.saveAndGetInterviewResult(interviewEndRequestDto.getInterviewId(),userDetails.getMember().getId());
         return ResponseDto.success(interviewResponseDto);
     }
