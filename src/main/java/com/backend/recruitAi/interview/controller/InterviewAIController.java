@@ -10,10 +10,11 @@ import com.backend.recruitAi.interview.dto.FirstQuestionRequestDto;
 import com.backend.recruitAi.interview.dto.FirstQuestionResponseDto;
 import com.backend.recruitAi.interview.service.FirstQuestionService;
 import com.backend.recruitAi.interview.service.OcrService;
-import com.backend.recruitAi.interview.service.RedisInterviewService;
+import com.backend.recruitAi.interview.redis.RedisInterviewService;
 import com.backend.recruitAi.interview.service.SttService;
 import com.backend.recruitAi.member.service.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -110,4 +111,15 @@ public class InterviewAIController {
         );
         return ResponseDto.success("첫 번째 질문 생성 성공", response);
     }
+
+
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    @PostMapping("/end")
+    public ResponseDto<?> endInterview(@RequestParam String interviewId, @RequestParam int lastSeq) {
+        redisTemplate.opsForValue().set("interview:" + interviewId + ":lastSeq", lastSeq);
+        return ResponseDto.success("면접 종료. 분석 대기 중");
+    }
+
+
 }
