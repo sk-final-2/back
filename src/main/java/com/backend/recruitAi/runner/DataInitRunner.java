@@ -2,7 +2,7 @@ package com.backend.recruitAi.runner;
 
 import com.backend.recruitAi.member.entity.*;
 import com.backend.recruitAi.member.repository.MemberRepository;
-import com.backend.recruitAi.result.repository.InterviewRepository;
+import com.backend.recruitAi.interview.repository.InterviewRepository;
 import com.backend.recruitAi.result.entity.InterviewResult;
 import com.backend.recruitAi.interview.entity.Interview;
 import com.backend.recruitAi.interview.entity.InterviewType;

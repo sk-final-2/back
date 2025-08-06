@@ -5,7 +5,7 @@ import com.backend.recruitAi.result.dto.InterviewResponseDto;
 import com.backend.recruitAi.result.entity.InterviewResult;
 import com.backend.recruitAi.interview.entity.Interview;
 import com.backend.recruitAi.result.repository.InterviewResultRepository;
-import com.backend.recruitAi.result.repository.InterviewRepository;
+import com.backend.recruitAi.interview.repository.InterviewRepository;
 import com.backend.recruitAi.member.entity.Member;
 import com.backend.recruitAi.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
