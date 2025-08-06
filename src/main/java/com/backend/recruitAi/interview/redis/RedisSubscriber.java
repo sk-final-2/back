@@ -19,7 +19,7 @@ public class RedisSubscriber implements MessageListener {
         String channel = new String(message.getChannel());
         String body = new String(message.getBody());
 
-        log.info("📨 Redis 수신 - 채널: {}, 메시지: {}", channel, body);
+        log.info("Redis 수신 - 채널: {}, 메시지: {}", channel, body);
 
         // ex: interview:abcd-1234:done → extract interviewId
         String interviewId = extractInterviewId(channel);

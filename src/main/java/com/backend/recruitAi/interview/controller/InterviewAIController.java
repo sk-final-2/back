@@ -3,22 +3,20 @@ package com.backend.recruitAi.interview.controller;
 import com.backend.recruitAi.global.exception.BusinessException;
 import com.backend.recruitAi.global.exception.ErrorCode;
 import com.backend.recruitAi.global.response.ResponseDto;
-import com.backend.recruitAi.interview.dto.AnswerResponseDto;
-import com.backend.recruitAi.interview.dto.OcrResponseDto;
-import com.backend.recruitAi.interview.service.EmotionService;
-import com.backend.recruitAi.interview.dto.FirstQuestionRequestDto;
-import com.backend.recruitAi.interview.dto.FirstQuestionResponseDto;
-import com.backend.recruitAi.interview.service.FirstQuestionService;
-import com.backend.recruitAi.interview.service.OcrService;
+import com.backend.recruitAi.interview.dto.*;
+import com.backend.recruitAi.interview.service.*;
 import com.backend.recruitAi.interview.redis.RedisInterviewService;
-import com.backend.recruitAi.interview.service.SttService;
 import com.backend.recruitAi.member.service.CustomUserDetails;
+import com.backend.recruitAi.result.dto.InterviewResponseDto;
+import com.backend.recruitAi.result.dto.InterviewResultDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import java.time.Duration;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +34,7 @@ public class InterviewAIController {
     private final EmotionService emotionService;
     private final RedisInterviewService redisInterviewService;
     private final FirstQuestionService firstQuestionService;
-
+    private final ResultService resultService;
     @PostMapping("/ocr")
     public ResponseDto<OcrResponseDto> ocrFromFile(@RequestPart("file") MultipartFile file) {
         try {
@@ -116,10 +114,16 @@ public class InterviewAIController {
     private final RedisTemplate<String, Object> redisTemplate;
 
     @PostMapping("/end")
-    public ResponseDto<?> endInterview(@RequestParam String interviewId, @RequestParam int lastSeq) {
-        redisTemplate.opsForValue().set("interview:" + interviewId + ":lastSeq", lastSeq);
+    public ResponseDto<?> endInterview(@RequestBody InterviewEndRequestDto interviewEndRequestDto) {
+        redisTemplate.opsForValue().set("interview:" + interviewEndRequestDto.getInterviewId() + ":lastSeq", interviewEndRequestDto.getLastSeq());
+        redisTemplate.expire("interview:" + interviewEndRequestDto.getInterviewId() + ":lastSeq", Duration.ofHours(1));
+        redisInterviewService.tryPublishIfComplete(interviewEndRequestDto.getInterviewId());
         return ResponseDto.success("면접 종료. 분석 대기 중");
     }
-
+    @PostMapping("/result")
+    public ResponseDto<?> getInterviewResult(@RequestBody InterviewEndRequestDto interviewEndRequestDto, @AuthenticationPrincipal CustomUserDetails userDetails){
+        InterviewResponseDto interviewResponseDto = resultService.saveAndGetInterviewResult(interviewEndRequestDto.getInterviewId(),userDetails.getMember().getId());
+        return ResponseDto.success(interviewResponseDto);
+    }
 
 }

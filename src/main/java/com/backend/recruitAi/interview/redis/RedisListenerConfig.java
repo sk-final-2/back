@@ -9,7 +9,7 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 
 @Configuration
 @RequiredArgsConstructor
-public class RedisConfig {
+public class RedisListenerConfig {
 
     private final RedisSubscriber redisSubscriber;
 

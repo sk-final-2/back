@@ -10,7 +10,7 @@ import com.backend.recruitAi.interview.dto.FirstQuestionResponseDto;
 import com.backend.recruitAi.interview.entity.Interview;
 import com.backend.recruitAi.member.entity.Member;
 import com.backend.recruitAi.member.repository.MemberRepository;
-import com.backend.recruitAi.result.repository.InterviewRepository;
+import com.backend.recruitAi.interview.repository.InterviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

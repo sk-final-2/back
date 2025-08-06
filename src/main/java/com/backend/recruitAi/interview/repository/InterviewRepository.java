@@ -1,4 +1,4 @@
-package com.backend.recruitAi.result.repository;
+package com.backend.recruitAi.interview.repository;
 
 import com.backend.recruitAi.interview.entity.Interview;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +12,5 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
 
     List<Interview> findAllByMemberId(Long memberId);
     Optional<Interview> findByIdAndMemberId(Long id, Long memberId);
+    Optional<Interview> findByUuid(String uuid);
 }

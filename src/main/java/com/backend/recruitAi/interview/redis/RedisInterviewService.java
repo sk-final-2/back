@@ -1,13 +1,16 @@
 package com.backend.recruitAi.interview.redis;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RedisInterviewService {
 
     private final RedisTemplate<String, Object> redisTemplate;
@@ -25,6 +28,8 @@ public class RedisInterviewService {
 
         redisTemplate.opsForHash().putAll(key, value);
 
+        redisTemplate.expire(key, Duration.ofHours(1));
+
         tryPublishIfComplete(interviewId);
     }
 
@@ -33,7 +38,7 @@ public class RedisInterviewService {
         String key = "interview:" + interviewId + ":seq:" + seq;
         redisTemplate.opsForHash().put(key, "emotionScore", emotion.get("score"));
         redisTemplate.opsForHash().put(key,"emotionText",emotion.get("text"));
-
+        redisTemplate.expire(key, Duration.ofHours(1));
         tryPublishIfComplete(interviewId);
     }
 
@@ -42,7 +47,10 @@ public class RedisInterviewService {
         Object lastSeqObj = redisTemplate.opsForValue().get(baseKey + ":lastSeq");
 
         // 아직 end 요청이 오지 않았으면 중단
-        if (lastSeqObj == null) return;
+        if (lastSeqObj == null) {
+            log.info("아직 lastSeq 없음");
+            return;
+        }
 
         int lastSeq = Integer.parseInt(lastSeqObj.toString());
 
