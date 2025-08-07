@@ -42,6 +42,14 @@ public class RedisInterviewService {
         tryPublishIfComplete(interviewId);
     }
 
+    public void savePartialTracking(String interviewId, int seq, Map<String, Object> tracking) {
+        String key = "interview:" + interviewId + ":seq:" + seq;
+        redisTemplate.opsForHash().put(key, "trackingScore", tracking.get("score"));
+        redisTemplate.opsForHash().put(key,"trackingText",tracking.get("text"));
+        redisTemplate.expire(key, Duration.ofHours(1));
+        tryPublishIfComplete(interviewId);
+    }
+
     public void tryPublishIfComplete(String interviewId) {
         String baseKey = "interview:" + interviewId;
         Object lastSeqObj = redisTemplate.opsForValue().get(baseKey + ":lastSeq");
@@ -60,7 +68,7 @@ public class RedisInterviewService {
 
             boolean emotionDone = data.containsKey("emotionScore");
             boolean sttDone = data.containsKey("sttScore");
-            //boolean gazeDone = data.containsKey("gazeScore");
+            //boolean trackingDone = data.containsKey("trackingScore");
             boolean gazeDone = true;
             if (!(emotionDone && sttDone && gazeDone)) {
                 return;

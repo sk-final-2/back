@@ -35,6 +35,8 @@ public class InterviewAIController {
     private final RedisInterviewService redisInterviewService;
     private final FirstQuestionService firstQuestionService;
     private final ResultService resultService;
+    private final TrackingService trackingService;
+
     @PostMapping("/ocr")
     public ResponseDto<OcrResponseDto> ocrFromFile(@RequestPart("file") MultipartFile file) {
         try {
@@ -61,17 +63,21 @@ public class InterviewAIController {
 
         File tempFile = null;
         File emotionTempFile = null;
+        File trackingTempFile = null;
 
         try {
             // 1. 원본 임시 파일 생성
             tempFile = File.createTempFile("upload_", ".mp4");
             file.transferTo(tempFile);
 
-            // 2. Emotion용 임시 파일 따로 복사
+            // 2. 임시 파일 따로 복사
             emotionTempFile = File.createTempFile("upload_emotion_", ".mp4");
             Files.copy(tempFile.toPath(), emotionTempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-            // 3. Emotion 서버 비동기 전송 (파일은 따로 보냄)
+            trackingTempFile = File.createTempFile("upload_tracking_", ".mp4");
+            Files.copy(tempFile.toPath(), trackingTempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+            // 3-1. Emotion 서버 비동기 전송 (파일은 따로 보냄)
             File finalEmotionFile = emotionTempFile;
             emotionService.sendToEmotionServer(finalEmotionFile, interviewId, seq)
                     .doFinally(signal -> {
@@ -80,6 +86,17 @@ public class InterviewAIController {
                     })
                     .subscribe(emoRes -> {
                         redisInterviewService.savePartialEmotion(interviewId, seq, emoRes);
+                    });
+
+            // 3-2. Tracking 서버 비동기 전송 (파일은 따로 보냄)
+            File finalTrackingFile = trackingTempFile;
+            trackingService.sendToTrackingServer(finalTrackingFile, interviewId, seq)
+                    .doFinally(signal -> {
+                        // 비동기 끝난 후 tracking용 파일 삭제
+                        if (finalTrackingFile.exists()) finalTrackingFile.delete();
+                    })
+                    .subscribe(traRes -> {
+                        redisInterviewService.savePartialTracking(interviewId, seq, traRes);
                     });
 
             // 4. STT 서버 요청 (원본 파일 사용)
