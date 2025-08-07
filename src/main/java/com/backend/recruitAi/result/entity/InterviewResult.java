@@ -48,13 +48,13 @@ public class InterviewResult {
     private int emotion_score;
 
     @Lob
-    @Column(name = "emotion_text", nullable = true) // 감정표현텍스트
+    @Column(name = "emotion_text", nullable = true, columnDefinition = "TEXT") // 감정표현텍스트
     private String emotion_text;
 
     @Column(name = "tracking_score", nullable = true) // 시선처리점수
     private int tracking_score;
 
     @Lob
-    @Column(name = "tracking_text", nullable = true) // 시선처리표현텍스트
+    @Column(name = "tracking_text", nullable = true, columnDefinition = "TEXT") // 시선처리표현텍스트
     private String tracking_text;
 }
