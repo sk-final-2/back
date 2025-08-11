@@ -11,17 +11,19 @@ import java.util.concurrent.TimeUnit;
 public class RefreshTokenService {
 
     private final StringRedisTemplate redisTemplate;
-    private final long REFRESH_EXPIRATION = 60 * 60 * 24 * 7; // 7일 (초 단위)
+    private static final long REFRESH_EXPIRATION = 60 * 60 * 24 * 7; // 7일
 
-    public void saveRefreshToken(String email, String refreshToken) {
-        redisTemplate.opsForValue().set(email, refreshToken, REFRESH_EXPIRATION, TimeUnit.SECONDS);
+    private String key(String rtid) { return "rt:" + rtid; }
+
+    public void saveRefreshToken(String rtid, String refreshToken) {
+        redisTemplate.opsForValue().set(key(rtid), refreshToken, REFRESH_EXPIRATION, TimeUnit.SECONDS);
     }
 
-    public String getRefreshToken(String email) {
-        return redisTemplate.opsForValue().get(email);
+    public String getRefreshToken(String rtid) {
+        return redisTemplate.opsForValue().get(key(rtid));
     }
 
-    public void deleteRefreshToken(String email) {
-        redisTemplate.delete(email);
+    public void deleteRefreshToken(String rtid) {
+        redisTemplate.delete(key(rtid));
     }
 }

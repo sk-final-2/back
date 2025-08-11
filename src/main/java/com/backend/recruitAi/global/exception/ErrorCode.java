@@ -14,7 +14,7 @@ public enum ErrorCode {
     ACCESS_TOKEN_NOT_FOUND(401, "AUTH003", "Access Token이 없습니다."),
     COOKIE_NOT_FOUND(401, "AUTH004", "쿠키가 없습니다."),
     INVALID_REFRESH_TOKEN(401, "AUTH005", "Refresh Token이 유효하지 않거나 존재하지 않습니다."),
-
+    REFRESH_TOKEN_NOT_FOUND(401,"AUTH006","rtid가 없습니다."),
     // 회원 관련
     USER_NOT_FOUND(404, "USER001", "회원이 존재하지 않습니다."),
     EMAIL_DUPLICATED(400, "EMAIL001", "이메일이 이미 존재합니다."),
