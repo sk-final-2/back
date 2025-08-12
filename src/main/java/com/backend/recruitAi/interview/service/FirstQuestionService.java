@@ -65,7 +65,7 @@ public class FirstQuestionService {
                     request.getLevel(),         // 난이도
                     request.getLanguage()       // 언어
             );
-            System.out.println(request.getOcrText()+"///"+ request.getLanguage());
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -85,11 +85,11 @@ public class FirstQuestionService {
             }
 
             FirstAskPythonResponseDto pythonResponse = response.getBody();
-            FirstAskPythonResponseDto.Data data = pythonResponse.getData();
 
+            // 7. 프론트 응답 변환
             return new FirstQuestionResponseDto(
-                    data.getInterviewId(),
-                    data.getQuestion(),
+                    pythonResponse.getInterviewId(),
+                    pythonResponse.getInterviewQuestion(),
                     request.getSeq()
             );
 
