@@ -1,5 +1,7 @@
 package com.backend.recruitAi.mypage.controller;
 
+import com.backend.recruitAi.global.exception.BusinessException;
+import com.backend.recruitAi.global.exception.ErrorCode;
 import com.backend.recruitAi.global.response.ResponseDto;
 import com.backend.recruitAi.member.entity.Member;
 import com.backend.recruitAi.member.service.CustomUserDetails;
@@ -24,6 +26,11 @@ public class MyPageController {
     @GetMapping
     public ResponseEntity<ResponseDto<MyPageResponseDto>> getMyInfo(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        if (userDetails == null || userDetails.getMember() == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+
         Member member = myPageService.findMemberById(userDetails.getMember().getId());
         return ResponseEntity.ok(ResponseDto.success(MyPageResponseDto.fromEntity(member)));
     }
@@ -32,6 +39,11 @@ public class MyPageController {
     @GetMapping("/info")
     public ResponseEntity<ResponseDto<MyPageSimpleResponseDto>> getMySimpleInfo(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        if (userDetails == null || userDetails.getMember() == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+
         Member member = myPageService.findMemberById(userDetails.getMember().getId());
         return ResponseEntity.ok(ResponseDto.success(MyPageSimpleResponseDto.fromEntity(member)));
     }
@@ -39,8 +51,13 @@ public class MyPageController {
     // 내 정보 수정 API
     @PatchMapping
     public ResponseEntity<ResponseDto<String>> updateMyInfo(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+                @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody MyPageUpdateRequestDto requestDto) {
+
+        if (userDetails == null || userDetails.getMember() == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+
         myPageService.updateMyInfo(userDetails.getMember().getId(), requestDto);
         return ResponseEntity.ok(ResponseDto.success("회원 정보 수정 성공"));
     }

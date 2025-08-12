@@ -61,6 +61,10 @@ public class InterviewAIController {
             @RequestParam("question") String question,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
+        if (userDetails == null || userDetails.getMember() == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+
         File tempFile = null;
         File emotionTempFile = null;
         File trackingTempFile = null;
@@ -120,6 +124,11 @@ public class InterviewAIController {
     public ResponseDto<FirstQuestionResponseDto> getFirstQuestion(
             @RequestBody FirstQuestionRequestDto request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        if (userDetails == null || userDetails.getMember() == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+
         FirstQuestionResponseDto response = firstQuestionService.handleFirstQuestion(
                 request,
                 userDetails.getMember().getId()
@@ -140,6 +149,11 @@ public class InterviewAIController {
     }
     @PostMapping("/result")
     public ResponseDto<InterviewResponseDto> getInterviewResult(@RequestBody InterviewEndRequestDto interviewEndRequestDto, @AuthenticationPrincipal CustomUserDetails userDetails){
+
+        if (userDetails == null || userDetails.getMember() == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+
         InterviewResponseDto interviewResponseDto = resultService.saveAndGetInterviewResult(interviewEndRequestDto.getInterviewId(),userDetails.getMember().getId());
         return ResponseDto.success(interviewResponseDto);
     }
