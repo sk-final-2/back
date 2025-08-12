@@ -90,14 +90,14 @@ public class AuthController {
 
         Cookie accessCookie = new Cookie("accessToken", accessToken);
         accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(true);
+        accessCookie.setSecure(false);
         accessCookie.setPath("/");
         accessCookie.setMaxAge(60 * 1); // 30분
         response.addCookie(accessCookie);
 
         Cookie rtidCookie  = new Cookie("rtid", rtid);
         rtidCookie .setHttpOnly(true);
-        rtidCookie .setSecure(true);
+        rtidCookie .setSecure(false);
         rtidCookie .setPath("/");
         rtidCookie .setMaxAge(60 * 60 * 24 * 7);
         response.addCookie(rtidCookie );
@@ -144,14 +144,14 @@ public class AuthController {
 
         Cookie newAccessCookie = new Cookie("accessToken", newAccessToken);
         newAccessCookie.setHttpOnly(true);
-        newAccessCookie.setSecure(true);
+        newAccessCookie.setSecure(false);
         newAccessCookie.setPath("/");
         newAccessCookie.setMaxAge(60 * 10); // 10분
         response.addCookie(newAccessCookie);
 
         Cookie newRtidCookie = new Cookie("rtid", newRtid);
         newRtidCookie.setHttpOnly(true);
-        newRtidCookie.setSecure(true);
+        newRtidCookie.setSecure(false);
         newRtidCookie.setPath("/");
         newRtidCookie.setMaxAge(60 * 60 * 24 * 7); // 7일
         response.addCookie(newRtidCookie);
@@ -181,7 +181,7 @@ public class AuthController {
         // 3) 쿠키 만료(삭제) - rtid
         Cookie killRtid = new Cookie("rtid", "");
         killRtid.setHttpOnly(true);
-        killRtid.setSecure(true);
+        killRtid.setSecure(false);
         killRtid.setPath("/");
         killRtid.setMaxAge(0);
         response.addCookie(killRtid);
@@ -189,7 +189,7 @@ public class AuthController {
         // 4) 쿠키 만료(삭제) - accessToken
         Cookie killAccess = new Cookie("accessToken", "");
         killAccess.setHttpOnly(true);
-        killAccess.setSecure(true);
+        killAccess.setSecure(false);
         killAccess.setPath("/");
         killAccess.setMaxAge(0);
         response.addCookie(killAccess);

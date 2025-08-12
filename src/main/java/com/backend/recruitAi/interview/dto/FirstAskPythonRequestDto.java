@@ -12,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FirstAskPythonRequestDto {
-    private String text;        // OCR 텍스트
+    private String ocrText;        // OCR 텍스트
     private String job;         // 직무
     private String interviewId; // UUID
     private int count;          // 질문 개수
