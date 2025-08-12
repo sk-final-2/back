@@ -1,5 +1,6 @@
 package com.backend.recruitAi.result.controller;
 
+import com.backend.recruitAi.global.exception.BusinessException;
 import com.backend.recruitAi.global.exception.ErrorCode;
 import com.backend.recruitAi.global.response.ResponseDto;
 import com.backend.recruitAi.result.dto.InterviewRequestDto;
@@ -25,6 +26,11 @@ public class InterviewController {
     public ResponseDto<InterviewResponseDto> createInterviewResult(
             @Valid @RequestBody InterviewRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        if (userDetails == null || userDetails.getMember() == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+
         try {
             InterviewResponseDto responseDto = interviewService.saveInterviewResult(userDetails.getMember().getId(), requestDto);
             return ResponseDto.success(responseDto);
@@ -37,6 +43,10 @@ public class InterviewController {
     public ResponseDto<List<InterviewResponseDto>> getAllInterviewResults(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
+        if (userDetails == null || userDetails.getMember() == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+
         List<InterviewResponseDto> responseDtos = interviewService.getAllInterviewResults(userDetails.getMember().getId());
         return ResponseDto.success(responseDtos);
     }
@@ -45,6 +55,11 @@ public class InterviewController {
     public ResponseDto<InterviewResponseDto> getInterviewResultById(
             @PathVariable Long interviewId,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        if (userDetails == null || userDetails.getMember() == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+
         try {
             InterviewResponseDto responseDto = interviewService.getInterviewResultById(interviewId, userDetails.getMember().getId());
             return ResponseDto.success(responseDto);
@@ -57,6 +72,11 @@ public class InterviewController {
     public ResponseDto<Void> deleteInterviewResult(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        if (userDetails == null || userDetails.getMember() == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+
         try {
             interviewService.deleteInterviewResult(id, userDetails.getMember().getId());
             return ResponseDto.success(null);

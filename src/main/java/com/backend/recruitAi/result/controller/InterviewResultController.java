@@ -1,5 +1,6 @@
 package com.backend.recruitAi.result.controller;
 
+import com.backend.recruitAi.global.exception.BusinessException;
 import com.backend.recruitAi.global.exception.ErrorCode;
 import com.backend.recruitAi.global.response.ResponseDto;
 import com.backend.recruitAi.result.service.InterviewResultService;
@@ -21,6 +22,11 @@ public class InterviewResultController {
     public ResponseDto<Void> deleteAnswerAnalysis(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        if (userDetails == null || userDetails.getMember() == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+
         try {
             interviewResultService.deleteAnswerAnalysis(id, userDetails.getMember().getId());
             return ResponseDto.success(null);
