@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-@ConfigurationProperties(prefix = "mail.naver")
+@ConfigurationProperties(prefix = "mail.gmail")
 @Getter @Setter
-public class NaverMailProperties {
+public class GmailMailProperties {
     private String host;
     private int port;
     private String username;
