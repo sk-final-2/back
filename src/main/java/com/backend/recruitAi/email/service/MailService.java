@@ -10,7 +10,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MailService {
 
-    private final JavaMailSender javaMailSender;
+    @Qualifier("gmailMailSender")
+    private final JavaMailSender gmailMailSender;
 
     @Qualifier("naverMailSender")
     private final JavaMailSender naverMailSender;
@@ -23,13 +24,13 @@ public class MailService {
 
         //도메인 확인 후 전송
         if (to.toLowerCase().endsWith("@naver.com")) {
-            message.setFrom("your_naver_id@naver.com");
+            message.setFrom("chlwldmschlwl2002@naver.com");
             System.out.println("📧 네이버 SMTP 사용: " + to);
             naverMailSender.send(message);
         } else {
-            message.setFrom("your_email@gmail.com");
+            message.setFrom("ssjjjieun0429@gmail.com");
             System.out.println("📧 Gmail SMTP 사용: " + to);
-            javaMailSender.send(message);
+            gmailMailSender.send(message);
         }
     }
 }
