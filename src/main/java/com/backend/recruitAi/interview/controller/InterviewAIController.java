@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.time.Duration;
-
+import com.backend.recruitAi.interview.service.TempMediaService;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +36,7 @@ public class InterviewAIController {
     private final FirstQuestionService firstQuestionService;
     private final ResultService resultService;
     private final TrackingService trackingService;
+    private final TempMediaService tempMediaService;
 
     @PostMapping("/ocr")
     public ResponseDto<OcrResponseDto> ocrFromFile(@RequestPart("file") MultipartFile file) {
@@ -54,7 +55,7 @@ public class InterviewAIController {
     }
 
     @PostMapping(value = "/answer", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseDto<AnswerResponseDto> handleAnswer(
+    public ResponseDto<?> handleAnswer(
             @RequestParam("file") MultipartFile file,
             @RequestParam("seq") int seq,
             @RequestParam("interviewId") String interviewId,
@@ -69,55 +70,61 @@ public class InterviewAIController {
         File emotionTempFile = null;
         File trackingTempFile = null;
 
+        boolean savedToMedia = false; // 보관 성공 여부 플래그
+
         try {
-            // 1. 원본 임시 파일 생성
+            // 1) 원본 임시 파일 생성
             tempFile = File.createTempFile("upload_", ".mp4");
             file.transferTo(tempFile);
 
-            // 2. 임시 파일 따로 복사
-            emotionTempFile = File.createTempFile("upload_emotion_", ".mp4");
-            Files.copy(tempFile.toPath(), emotionTempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            // 2) 감정/트래킹용 복사본 생성
+//            emotionTempFile = File.createTempFile("upload_emotion_", ".mp4");
+//            Files.copy(tempFile.toPath(), emotionTempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+//
+//            trackingTempFile = File.createTempFile("upload_tracking_", ".mp4");
+//            Files.copy(tempFile.toPath(), trackingTempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+//
+//            // 3-1) Emotion 서버 비동기 전송
+//            File finalEmotionFile = emotionTempFile;
+//            emotionService.sendToEmotionServer(finalEmotionFile, interviewId, seq)
+//                    .doFinally(signal -> {
+//                        if (finalEmotionFile.exists()) finalEmotionFile.delete();
+//                    })
+//                    .subscribe(emoRes -> redisInterviewService.savePartialEmotion(interviewId, seq, emoRes));
+//
+//            // 3-2) Tracking 서버 비동기 전송
+//            File finalTrackingFile = trackingTempFile;
+//            trackingService.sendToTrackingServer(finalTrackingFile, interviewId, seq)
+//                    .doFinally(signal -> {
+//                        if (finalTrackingFile.exists()) finalTrackingFile.delete();
+//                    })
+//                    .subscribe(traRes -> redisInterviewService.savePartialTracking(interviewId, seq, traRes));
+//
+//            // 4) STT 서버 요청 (원본 사용)
+//            Map<String, Object> sttRes = sttService.sendToSttServer(tempFile, interviewId, seq)
+//                    .doOnNext(res -> redisInterviewService.savePartialSTT(interviewId, seq, res, question))
+//                    .block();
 
-            trackingTempFile = File.createTempFile("upload_tracking_", ".mp4");
-            Files.copy(tempFile.toPath(), trackingTempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            // 5) ★정상 흐름에서만 원본 영상 임시보관에 저장
+            tempMediaService.save(tempFile, interviewId, seq);
+            savedToMedia = true; // 보관 성공
 
-            // 3-1. Emotion 서버 비동기 전송 (파일은 따로 보냄)
-            File finalEmotionFile = emotionTempFile;
-            emotionService.sendToEmotionServer(finalEmotionFile, interviewId, seq)
-                    .doFinally(signal -> {
-                        // 비동기 끝난 후 emotion용 파일 삭제
-                        if (finalEmotionFile.exists()) finalEmotionFile.delete();
-                    })
-                    .subscribe(emoRes -> {
-                        redisInterviewService.savePartialEmotion(interviewId, seq, emoRes);
-                    });
-
-            // 3-2. Tracking 서버 비동기 전송 (파일은 따로 보냄)
-            File finalTrackingFile = trackingTempFile;
-            trackingService.sendToTrackingServer(finalTrackingFile, interviewId, seq)
-                    .doFinally(signal -> {
-                        // 비동기 끝난 후 tracking용 파일 삭제
-                        if (finalTrackingFile.exists()) finalTrackingFile.delete();
-                    })
-                    .subscribe(traRes -> {
-                        redisInterviewService.savePartialTracking(interviewId, seq, traRes);
-                    });
-
-            // 4. STT 서버 요청 (원본 파일 사용)
-            Map<String, Object> sttRes = sttService.sendToSttServer(tempFile, interviewId, seq)
-                    .doOnNext(res -> redisInterviewService.savePartialSTT(interviewId, seq, res, question))
-                    .block();
-
-            return ResponseDto.success(new AnswerResponseDto(
-                    interviewId,
-                    (String) sttRes.get("new_question"),
-                    Boolean.parseBoolean(String.valueOf(sttRes.get("keepGoing")))
-            ));
+//            return ResponseDto.success(new AnswerResponseDto(
+//                    interviewId,
+//                    (String) sttRes.get("new_question"),
+//                    Boolean.parseBoolean(String.valueOf(sttRes.get("keepGoing")))
+//            ));
+            return ResponseDto.success("");
 
         } catch (Exception e) {
+            // 실패 시 에러 반환
             return ResponseDto.error(ErrorCode.INTERNAL_SERVER_ERROR);
         } finally {
-            if (tempFile != null && tempFile.exists()) tempFile.delete();
+            // 실패했거나 보관하지 못했으면 원본 임시파일 정리
+            if (!savedToMedia && tempFile != null && tempFile.exists()) {
+                try { Files.deleteIfExists(tempFile.toPath()); } catch (Exception ignore) {}
+            }
+            // emotionTempFile / trackingTempFile은 각 doFinally에서 삭제됨
         }
     }
 
