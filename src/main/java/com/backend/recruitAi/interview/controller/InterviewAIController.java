@@ -110,7 +110,8 @@ public class InterviewAIController {
 
             return ResponseDto.success(new AnswerResponseDto(
                     interviewId,
-                    (String) sttRes.get("new_question")
+                    (String) sttRes.get("new_question"),
+                    Boolean.parseBoolean(String.valueOf(sttRes.get("keepGoing")))
             ));
 
         } catch (Exception e) {
