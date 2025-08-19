@@ -105,7 +105,11 @@ public class DataInitRunner implements CommandLineRunner {
                     .bad("기술 역량에 대한 구체적인 설명이 부족했습니다.")
                     .score(85)
                     .emotion_score(90)
-                    .tracking_score(95)
+                    .mediapipe_text("bad_text")
+                    .blink_score(80)
+                    .eye_score(85)
+                    .head_score(75)
+                    .hand_score(80)
                     .interview(interview1)
                     .build();
 
@@ -117,7 +121,11 @@ public class DataInitRunner implements CommandLineRunner {
                     .bad("각 원칙에 대한 구체적인 예시가 부족했습니다.")
                     .score(80)
                     .emotion_score(85)
-                    .tracking_score(80)
+                    .mediapipe_text("good_text")
+                    .blink_score(85)
+                    .eye_score(83)
+                    .head_score(77)
+                    .hand_score(81)
                     .interview(interview1)
                     .build();
 
@@ -146,7 +154,11 @@ public class DataInitRunner implements CommandLineRunner {
                     .bad("다른 언어와의 비교가 부족했습니다.")
                     .score(78)
                     .emotion_score(75)
-                    .tracking_score(90)
+                    .mediapipe_text("default_text")
+                    .blink_score(88)
+                    .eye_score(84)
+                    .head_score(79)
+                    .hand_score(81)
                     .interview(interview2)
                     .build();
 
@@ -158,7 +170,11 @@ public class DataInitRunner implements CommandLineRunner {
                     .bad("구체적인 갈등 해결 사례가 제시되지 않았습니다.")
                     .score(82)
                     .emotion_score(88)
-                    .tracking_score(85)
+                    .mediapipe_text("another_text")
+                    .blink_score(88)
+                    .eye_score(86)
+                    .head_score(70)
+                    .hand_score(81)
                     .interview(interview2)
                     .build();
 
@@ -170,7 +186,11 @@ public class DataInitRunner implements CommandLineRunner {
                     .bad("없음")
                     .score(90)
                     .emotion_score(92)
-                    .tracking_score(98)
+                    .mediapipe_text("last_text")
+                    .blink_score(81)
+                    .eye_score(84)
+                    .head_score(72)
+                    .hand_score(85)
                     .interview(interview2)
                     .build();
 

@@ -1,6 +1,7 @@
 package com.backend.recruitAi.result.dto;
 
 import com.backend.recruitAi.interview.entity.Interview;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,7 @@ public class InterviewResponseDto {
     private Long id;
     private String uuid;
     private Long memberId;
+    @JsonFormat(pattern = "yyyy년 MM월 dd일 HH:mm:ss")
     private LocalDateTime createdAt;
     private String job;
     private String career;
@@ -28,7 +30,9 @@ public class InterviewResponseDto {
     private Integer count;
     private List<InterviewResultDto> answerAnalyses;
 
-    public static InterviewResponseDto fromEntity(Interview entity) {
+    private List<AvgScoreDto> avgScore;
+
+    public static InterviewResponseDto fromEntity(Interview entity, List<AvgScoreDto> avgScoreList) {
         List<InterviewResultDto> analysisDtos = entity.getAnswerAnalyses().stream()
                 .map(InterviewResultDto::fromEntity)
                 .collect(Collectors.toList());
@@ -45,6 +49,7 @@ public class InterviewResponseDto {
                 .language(entity.getLanguage() != null ? entity.getLanguage().name() : null)
                 .count(entity.getCount())
                 .answerAnalyses(analysisDtos)
+                .avgScore(avgScoreList)
                 .build();
     }
 }

@@ -33,14 +33,20 @@ public class InterviewResultDto {
     @NotNull(message = "총 점수는 필수입니다.")
     private int score;
 
+    private String emotionText;
+
+    private String mediapipeText;
+
     @NotNull(message = "감정 점수는 필수입니다.")
     private int emotionScore;
 
-    private String emotionText;
+    private Integer blinkScore;
 
-    private Integer trackingScore;
+    private Integer eyeScore;
 
-    private String trackingText;
+    private Integer headScore;
+
+    private Integer handScore;
 
     public static InterviewResultDto fromEntity(InterviewResult entity) {
         return InterviewResultDto.builder()
@@ -51,10 +57,13 @@ public class InterviewResultDto {
                 .good(entity.getGood())
                 .bad(entity.getBad())
                 .score(entity.getScore())
-                .emotionScore(entity.getEmotion_score())
                 .emotionText(entity.getEmotion_text())
-                .trackingScore(entity.getTracking_score())
-                .trackingText(entity.getTracking_text())
+                .mediapipeText(entity.getMediapipe_text())
+                .emotionScore(entity.getEmotion_score())
+                .blinkScore(entity.getBlink_score())
+                .eyeScore(entity.getEye_score())
+                .headScore(entity.getHead_score())
+                .handScore(entity.getHand_score())
                 .build();
     }
 }
