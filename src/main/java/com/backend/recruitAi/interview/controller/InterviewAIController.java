@@ -77,44 +77,43 @@ public class InterviewAIController {
             tempFile = File.createTempFile("upload_", ".mp4");
             file.transferTo(tempFile);
 
-            // 2) 감정/트래킹용 복사본 생성
-//            emotionTempFile = File.createTempFile("upload_emotion_", ".mp4");
-//            Files.copy(tempFile.toPath(), emotionTempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-//
-//            trackingTempFile = File.createTempFile("upload_tracking_", ".mp4");
-//            Files.copy(tempFile.toPath(), trackingTempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-//
-//            // 3-1) Emotion 서버 비동기 전송
-//            File finalEmotionFile = emotionTempFile;
-//            emotionService.sendToEmotionServer(finalEmotionFile, interviewId, seq)
-//                    .doFinally(signal -> {
-//                        if (finalEmotionFile.exists()) finalEmotionFile.delete();
-//                    })
-//                    .subscribe(emoRes -> redisInterviewService.savePartialEmotion(interviewId, seq, emoRes));
-//
-//            // 3-2) Tracking 서버 비동기 전송
-//            File finalTrackingFile = trackingTempFile;
-//            trackingService.sendToTrackingServer(finalTrackingFile, interviewId, seq)
-//                    .doFinally(signal -> {
-//                        if (finalTrackingFile.exists()) finalTrackingFile.delete();
-//                    })
-//                    .subscribe(traRes -> redisInterviewService.savePartialTracking(interviewId, seq, traRes));
-//
-//            // 4) STT 서버 요청 (원본 사용)
-//            Map<String, Object> sttRes = sttService.sendToSttServer(tempFile, interviewId, seq)
-//                    .doOnNext(res -> redisInterviewService.savePartialSTT(interviewId, seq, res, question))
-//                    .block();
+            //2) 감정/트래킹용 복사본 생성
+            emotionTempFile = File.createTempFile("upload_emotion_", ".mp4");
+            Files.copy(tempFile.toPath(), emotionTempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+            trackingTempFile = File.createTempFile("upload_tracking_", ".mp4");
+            Files.copy(tempFile.toPath(), trackingTempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+            // 3-1) Emotion 서버 비동기 전송
+            File finalEmotionFile = emotionTempFile;
+            emotionService.sendToEmotionServer(finalEmotionFile, interviewId, seq)
+                    .doFinally(signal -> {
+                        if (finalEmotionFile.exists()) finalEmotionFile.delete();
+                    })
+                    .subscribe(emoRes -> redisInterviewService.savePartialEmotion(interviewId, seq, emoRes));
+
+            // 3-2) Tracking 서버 비동기 전송
+            File finalTrackingFile = trackingTempFile;
+            trackingService.sendToTrackingServer(finalTrackingFile, interviewId, seq)
+                    .doFinally(signal -> {
+                        if (finalTrackingFile.exists()) finalTrackingFile.delete();
+                    })
+                    .subscribe(traRes -> redisInterviewService.savePartialTracking(interviewId, seq, traRes));
+
+            // 4) STT 서버 요청 (원본 사용)
+            Map<String, Object> sttRes = sttService.sendToSttServer(tempFile, interviewId, seq, question)
+                    .doOnNext(res -> redisInterviewService.savePartialSTT(interviewId, seq, res, question))
+                    .block();
 
             // 5) ★정상 흐름에서만 원본 영상 임시보관에 저장
             tempMediaService.save(tempFile, interviewId, seq);
             savedToMedia = true; // 보관 성공
 
-//            return ResponseDto.success(new AnswerResponseDto(
-//                    interviewId,
-//                    (String) sttRes.get("new_question"),
-//                    Boolean.parseBoolean(String.valueOf(sttRes.get("keepGoing")))
-//            ));
-            return ResponseDto.success("");
+            return ResponseDto.success(new AnswerResponseDto(
+                    interviewId,
+                    (String) sttRes.get("new_question"),
+                    Boolean.parseBoolean(String.valueOf(sttRes.get("keepGoing")))
+            ));
 
         } catch (Exception e) {
             // 실패 시 에러 반환
@@ -153,17 +152,19 @@ public class InterviewAIController {
         redisTemplate.expire("interview:" + interviewEndRequestDto.getInterviewId() + ":lastSeq", Duration.ofHours(1));
         redisInterviewService.tryPublishIfComplete(interviewEndRequestDto.getInterviewId());
         return ResponseDto.success("면접 종료. 분석 대기 중");
-
     }
     @PostMapping("/result")
-    public ResponseDto<InterviewResponseDto> getInterviewResult(@RequestBody InterviewEndRequestDto interviewEndRequestDto, @AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseDto<InterviewTempResponseDto> getInterviewResult(@RequestBody InterviewEndRequestDto interviewEndRequestDto, @AuthenticationPrincipal CustomUserDetails userDetails){
 
         if (userDetails == null || userDetails.getMember() == null) {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
+        //timestamp 포함 응답 형식 가져오기
+        InterviewTempResponseDto interviewResponseTempDto = resultService.viewInterviewTemp(interviewEndRequestDto.getInterviewId());
+        //db 저장
+        resultService.saveInterviewResult(interviewEndRequestDto.getInterviewId(),userDetails.getMember().getId());
 
-        InterviewResponseDto interviewResponseDto = resultService.saveAndGetInterviewResult(interviewEndRequestDto.getInterviewId(),userDetails.getMember().getId());
-        return ResponseDto.success(interviewResponseDto);
+        return ResponseDto.success(interviewResponseTempDto);
     }
 
 }
