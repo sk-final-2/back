@@ -2,10 +2,12 @@ package com.backend.recruitAi.interview.service;
 
 import com.backend.recruitAi.interview.entity.Interview;
 import com.backend.recruitAi.member.repository.MemberRepository;
+import com.backend.recruitAi.result.dto.AvgScoreDto;
 import com.backend.recruitAi.result.dto.InterviewResponseDto;
 import com.backend.recruitAi.result.entity.InterviewResult;
 import com.backend.recruitAi.interview.repository.InterviewRepository;
 import com.backend.recruitAi.result.repository.InterviewResultRepository;
+import com.backend.recruitAi.result.service.AvgScoreService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,7 @@ public class ResultService {
     private final InterviewRepository interviewRepository;
     private final InterviewResultRepository interviewResultRepository;
     private final MemberRepository memberRepository;
+    private final AvgScoreService avgScoreService;
 
     @Transactional
     public InterviewResponseDto saveAndGetInterviewResult(String interviewId, Long memberId) {
@@ -47,8 +50,13 @@ public class ResultService {
                     .score(parseIntOrDefault(data.get("sttScore"), 0))
                     .emotion_score(parseIntOrDefault(data.get("emotionScore"), 0))
                     .emotion_text((String) data.getOrDefault("emotionText", null))
-                    .tracking_score(parseIntOrDefault(data.get("trackingScore"), 0))
-                    .tracking_text((String) data.getOrDefault("trackingText", null))
+//                    .tracking_score(parseIntOrDefault(data.get("trackingScore"), 0))
+//                    .tracking_text((String) data.getOrDefault("trackingText", null))
+                    .mediapipe_text((String) data.getOrDefault("mediapipeText", null))
+                    .blink_score(parseIntOrDefault(data.get("blinkScore"), 0))
+                    .eye_score(parseIntOrDefault(data.get("eyeScore"), 0))
+                    .head_score(parseIntOrDefault(data.get("headScore"), 0))
+                    .hand_score(parseIntOrDefault(data.get("handScore"), 0))
                     .build();
 
             results.add(result);
@@ -74,8 +82,11 @@ public class ResultService {
         }
         redisTemplate.delete(baseKey + ":lastSeq");
 
+        // AvgScoreService를 사용하여 평균 점수 계산
+        AvgScoreDto avgScore = avgScoreService.calculateAverageScores(results);
+
         // 응답 DTO 반환
-        return InterviewResponseDto.fromEntity(interview);
+        return InterviewResponseDto.fromEntity(interview, Collections.singletonList(avgScore));
     }
 
     private int parseIntOrDefault(Object value, int defaultVal) {

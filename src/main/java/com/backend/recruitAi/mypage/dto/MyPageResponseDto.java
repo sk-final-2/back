@@ -4,6 +4,7 @@ import com.backend.recruitAi.member.entity.GenderType;
 import com.backend.recruitAi.member.entity.Member;
 import com.backend.recruitAi.member.entity.Provider;
 import com.backend.recruitAi.member.entity.Role;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 
@@ -23,6 +24,7 @@ public class MyPageResponseDto {
     private LocalDate birth;
     private Provider provider;
     private Role role;
+    @JsonFormat(pattern = "yyyy년 MM월 dd일 HH:mm:ss")
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt; // 수정된 필드명으로 변경
 
