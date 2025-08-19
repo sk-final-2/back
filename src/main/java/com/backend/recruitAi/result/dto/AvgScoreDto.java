@@ -10,10 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AvgScoreDto {
-    private int score;
-    private int emotionScore;
-    private int blinkScore;
-    private int eyeScore;
-    private int headScore;
-    private int handScore;
+    private double score;
+    private double emotionScore;
+    private double blinkScore;
+    private double eyeScore;
+    private double headScore;
+    private double handScore;
 }
