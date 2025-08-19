@@ -92,7 +92,7 @@ public class AuthController {
         accessCookie.setHttpOnly(true);
         accessCookie.setSecure(false);
         accessCookie.setPath("/");
-        accessCookie.setMaxAge(60 * 1); // 30분
+        accessCookie.setMaxAge(60 * 30); // 30분
         response.addCookie(accessCookie);
 
         Cookie rtidCookie  = new Cookie("rtid", rtid);
@@ -146,7 +146,7 @@ public class AuthController {
         newAccessCookie.setHttpOnly(true);
         newAccessCookie.setSecure(false);
         newAccessCookie.setPath("/");
-        newAccessCookie.setMaxAge(60 * 10); // 10분
+        newAccessCookie.setMaxAge(60 * 30); // 10분
         response.addCookie(newAccessCookie);
 
         Cookie newRtidCookie = new Cookie("rtid", newRtid);

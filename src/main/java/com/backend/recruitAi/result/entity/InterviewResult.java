@@ -27,7 +27,7 @@ public class InterviewResult {
     private int seq;
 
     @Column(name = "question", nullable = false, length = 255)
-    private String question; // 질문내용
+    private String question;
 
     @Lob // 긴 텍스트를 저장하기 위해 CLOB 타입으로 매핑
     @Column(name = "interview_answer", nullable = false) // 답변내용
@@ -41,20 +41,29 @@ public class InterviewResult {
     @Column(name = "interview_answer_bad", nullable = false) // 못한점
     private String bad;
 
-    @Column(name = "score", nullable = false) // 총 점수
+    @Column(name = "score", nullable = false)
     private int score;
 
-    @Column(name = "emotion_score", nullable = false) // 표정점수
-    private int emotion_score;
-
     @Lob
-    @Column(name = "emotion_text", nullable = true, columnDefinition = "TEXT") // 감정표현텍스트
+    @Column(name = "emotion_text", nullable = true, columnDefinition = "TEXT")
     private String emotion_text;
 
-    @Column(name = "tracking_score", nullable = true) // 시선처리점수
-    private int tracking_score;
-
     @Lob
-    @Column(name = "tracking_text", nullable = true, columnDefinition = "TEXT") // 시선처리표현텍스트
-    private String tracking_text;
+    @Column(name = "mediapipe_text", nullable = true, columnDefinition = "TEXT")
+    private String mediapipe_text;
+
+    @Column(name = "emotion_score", nullable = false)
+    private int emotion_score;
+
+    @Column(name = "blink_score", nullable = false)
+    private int blink_score;
+
+    @Column(name = "eye_score", nullable = false)
+    private int eye_score;
+
+    @Column(name = "head_score", nullable = false)
+    private int head_score;
+
+    @Column(name = "hand_score", nullable = false)
+    private int hand_score;
 }

@@ -1,21 +1,18 @@
-package com.backend.recruitAi.result.dto;
+package com.backend.recruitAi.interview.dto;
 
 import com.backend.recruitAi.interview.entity.Interview;
+import com.backend.recruitAi.result.dto.AvgScoreDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InterviewResponseDto {
+public class InterviewTempResponseDto {
     private String uuid;
     private Long memberId;
     @JsonFormat(pattern = "yyyy년 MM월 dd일 HH:mm:ss")
@@ -26,16 +23,19 @@ public class InterviewResponseDto {
     private String level;
     private String language;
     private Integer count;
-    private List<InterviewResultDto> answerAnalyses;
 
+    // 미리보기 결과(타임스탬프 포함)
+    private List<InterviewTempResultDto> answerAnalyses;
+
+    // 평균 점수(전체 평균 1건만 담아도 되면 List<AvgScoreDto>에 1개 넣어서 전달)
     private List<AvgScoreDto> avgScore;
 
-    public static InterviewResponseDto fromEntity(Interview entity, List<AvgScoreDto> avgScoreList) {
-        List<InterviewResultDto> analysisDtos = entity.getAnswerAnalyses().stream()
-                .map(InterviewResultDto::fromEntity)
-                .collect(Collectors.toList());
-
-        return InterviewResponseDto.builder()
+    public static InterviewTempResponseDto of(
+            Interview entity,
+            List<InterviewTempResultDto> tempResults,
+            List<AvgScoreDto> avgScoreList
+    ) {
+        return InterviewTempResponseDto.builder()
                 .uuid(entity.getUuid())
                 .memberId(entity.getMember().getId())
                 .createdAt(entity.getCreatedAt())
@@ -45,7 +45,7 @@ public class InterviewResponseDto {
                 .level(entity.getLevel() != null ? entity.getLevel().name() : null)
                 .language(entity.getLanguage() != null ? entity.getLanguage().name() : null)
                 .count(entity.getCount())
-                .answerAnalyses(analysisDtos)
+                .answerAnalyses(tempResults)
                 .avgScore(avgScoreList)
                 .build();
     }

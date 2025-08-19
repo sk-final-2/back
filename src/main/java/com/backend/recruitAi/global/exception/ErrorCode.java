@@ -36,6 +36,7 @@ public enum ErrorCode {
     NO_AUTHORITY(403, "AUTH006", "해당 작업을 수행할 권한이 없습니다."),
     MEMBER_NOT_FOUND(204, "COMMON002", "조회할 내용이 없습니다."),
 
+    AVAERAGE_ERROR(500,"AVERAGE001","평균을 조회하다가 문제가 생겨떠"),
     // 서버 오류
     INTERNAL_SERVER_ERROR(500, "COMMON001", "서버 오류입니다.");
 

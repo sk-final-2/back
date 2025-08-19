@@ -1,5 +1,8 @@
 package com.backend.recruitAi.result.service;
 
+import com.backend.recruitAi.global.exception.BusinessException;
+import com.backend.recruitAi.global.exception.ErrorCode;
+import com.backend.recruitAi.result.dto.AvgScoreDto;
 import com.backend.recruitAi.result.dto.InterviewRequestDto;
 import com.backend.recruitAi.result.dto.InterviewResponseDto;
 import com.backend.recruitAi.result.entity.InterviewResult;
@@ -16,6 +19,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +29,7 @@ public class InterviewService {
     private final InterviewRepository interviewRepository;
     private final MemberRepository memberRepository;
     private final InterviewResultRepository interviewResultRepository;
+    private final AvgScoreService avgScoreService;
 
     // 새로운 인터뷰 결과 저장 (컨트롤러에서 DTO를 받아 처리)
     @Transactional
@@ -40,6 +45,7 @@ public class InterviewService {
                 .type(requestDto.getType())
                 .level(requestDto.getLevel())
                 .language(requestDto.getLanguage())
+                .count(requestDto.getAnswerAnalyses().size())
                 .build();
 
         Interview savedResult = interviewRepository.save(interview);
@@ -52,19 +58,24 @@ public class InterviewService {
                         .answer(dto.getAnswer())
                         .good(dto.getGood())
                         .bad(dto.getBad())
+                        .score(dto.getScore())
                         .emotion_score(dto.getEmotionScore())
                         .emotion_text(dto.getEmotionText())
-                        .tracking_score(dto.getTrackingScore())
-                        .tracking_text(dto.getTrackingText())
+                        .mediapipe_text(dto.getMediapipeText())
+                        .blink_score(dto.getBlinkScore())
+                        .eye_score(dto.getEyeScore())
+                        .head_score(dto.getHeadScore())
+                        .hand_score(dto.getHandScore())
                         .build())
                 .collect(Collectors.toList());
 
         answerAnalyses.forEach(interviewResultRepository::save);
 
-        // 연관 관계 설정
         savedResult.setAnswerAnalyses(answerAnalyses);
 
-        return InterviewResponseDto.fromEntity(savedResult);
+        //AvgScoreDto avgScore = avgScoreService.calculateAverageScores(answerAnalyses);
+        AvgScoreDto avgScore = interviewResultRepository.findAllAverageScores().orElseThrow(() -> new BusinessException(ErrorCode.AVAERAGE_ERROR));
+        return InterviewResponseDto.fromEntity(savedResult, Collections.singletonList(avgScore));
     }
 
     // 기존 인터뷰 결과 저장 (엔티티 직접 전달)
@@ -77,15 +88,25 @@ public class InterviewService {
     public List<InterviewResponseDto> getAllInterviewResults(Long memberId) {
         List<Interview> results = interviewRepository.findAllByMemberId(memberId);
         return results.stream()
-                .map(InterviewResponseDto::fromEntity)
+                .map(interview -> {
+                    List<InterviewResult> interviewResults = interviewResultRepository.findAllByInterview(interview);
+                    // ✅ AvgScoreService를 호출하여 평균 점수 계산
+                    AvgScoreDto avgScore = interviewResultRepository.findAllAverageScores().orElseThrow(() -> new BusinessException(ErrorCode.AVAERAGE_ERROR));
+                    return InterviewResponseDto.fromEntity(interview, Collections.singletonList(avgScore));
+                })
                 .collect(Collectors.toList());
     }
+
 
     // 특정 ID의 인터뷰 결과 조회
     public InterviewResponseDto getInterviewResultById(Long id, Long memberId) {
         Interview result = interviewRepository.findByIdAndMemberId(id, memberId)
                 .orElseThrow(() -> new NoSuchElementException("인터뷰 결과를 찾을 수 없거나 권한이 없습니다."));
-        return InterviewResponseDto.fromEntity(result);
+
+        List<InterviewResult> interviewResults = interviewResultRepository.findAllByInterview(result);
+        // ✅ AvgScoreService를 호출하여 평균 점수 계산
+        AvgScoreDto avgScore = interviewResultRepository.findAllAverageScores().orElseThrow(() -> new BusinessException(ErrorCode.AVAERAGE_ERROR));
+        return InterviewResponseDto.fromEntity(result, Collections.singletonList(avgScore));
     }
 
     // 인터뷰 결과 삭제

@@ -38,14 +38,28 @@ public class RedisInterviewService {
         String key = "interview:" + interviewId + ":seq:" + seq;
         redisTemplate.opsForHash().put(key, "emotionScore", emotion.get("score"));
         redisTemplate.opsForHash().put(key,"emotionText",emotion.get("text"));
+        // timestamp: List<Map<String, String>> 형태 그대로 저장
+        Object timestamps = emotion.get("timestamp"); // ex) List<Map<String, String>>
+        if (timestamps != null) {
+            redisTemplate.opsForHash().put(key, "emotionTimestamps", timestamps);
+        }
+
         redisTemplate.expire(key, Duration.ofHours(1));
         tryPublishIfComplete(interviewId);
     }
 
     public void savePartialTracking(String interviewId, int seq, Map<String, Object> tracking) {
         String key = "interview:" + interviewId + ":seq:" + seq;
-        redisTemplate.opsForHash().put(key, "trackingScore", tracking.get("score"));
         redisTemplate.opsForHash().put(key,"trackingText",tracking.get("text"));
+        redisTemplate.opsForHash().put(key, "blinkScore", tracking.get("blinkScore"));
+        redisTemplate.opsForHash().put(key, "eyeScore", tracking.get("eyeScore"));
+        redisTemplate.opsForHash().put(key, "headScore", tracking.get("headScore"));
+        redisTemplate.opsForHash().put(key, "handScore", tracking.get("handScore"));
+        Object timestamps = tracking.get("timestamp"); // ex) List<Map<String, String>>
+        if (timestamps != null) {
+            redisTemplate.opsForHash().put(key, "trackingTimestamps", timestamps);
+        }
+
         redisTemplate.expire(key, Duration.ofHours(1));
         tryPublishIfComplete(interviewId);
     }

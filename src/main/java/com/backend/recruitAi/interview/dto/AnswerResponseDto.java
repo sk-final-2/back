@@ -8,4 +8,5 @@ import lombok.Getter;
 public class AnswerResponseDto {
     private String interviewId;
     private String newQuestion;
+    private boolean keepGoing;
 }

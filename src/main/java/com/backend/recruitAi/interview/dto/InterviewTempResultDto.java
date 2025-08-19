@@ -1,4 +1,5 @@
-package com.backend.recruitAi.result.dto;
+package com.backend.recruitAi.interview.dto;
+
 
 import com.backend.recruitAi.result.entity.InterviewResult;
 import jakarta.validation.constraints.NotBlank;
@@ -8,13 +9,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InterviewResultDto {
-    private Long id;
-
+public class InterviewTempResultDto {
     @NotNull(message = "순번은 필수입니다.")
     private int seq;
 
@@ -48,9 +49,10 @@ public class InterviewResultDto {
 
     private Integer handScore;
 
-    public static InterviewResultDto fromEntity(InterviewResult entity) {
-        return InterviewResultDto.builder()
-                .id(entity.getId())
+    private List<TimeStampDto> timestamp;
+
+    public static InterviewTempResultDto fromEntityAndTimeStamp(InterviewResult entity,List<TimeStampDto> timeStampDto) {
+        return InterviewTempResultDto.builder()
                 .seq(entity.getSeq())
                 .question(entity.getQuestion())
                 .answer(entity.getAnswer())
@@ -64,6 +66,7 @@ public class InterviewResultDto {
                 .eyeScore(entity.getEye_score())
                 .headScore(entity.getHead_score())
                 .handScore(entity.getHand_score())
+                .timestamp(timeStampDto)
                 .build();
     }
 }
