@@ -1,5 +1,7 @@
 package com.backend.recruitAi.result.service;
 
+import com.backend.recruitAi.global.exception.BusinessException;
+import com.backend.recruitAi.global.exception.ErrorCode;
 import com.backend.recruitAi.result.dto.AvgScoreDto;
 import com.backend.recruitAi.result.dto.InterviewRequestDto;
 import com.backend.recruitAi.result.dto.InterviewResponseDto;
@@ -71,7 +73,8 @@ public class InterviewService {
 
         savedResult.setAnswerAnalyses(answerAnalyses);
 
-        AvgScoreDto avgScore = avgScoreService.calculateAverageScores(answerAnalyses);
+        //AvgScoreDto avgScore = avgScoreService.calculateAverageScores(answerAnalyses);
+        AvgScoreDto avgScore = interviewResultRepository.findAllAverageScores().orElseThrow(() -> new BusinessException(ErrorCode.AVAERAGE_ERROR));
         return InterviewResponseDto.fromEntity(savedResult, Collections.singletonList(avgScore));
     }
 
@@ -88,7 +91,7 @@ public class InterviewService {
                 .map(interview -> {
                     List<InterviewResult> interviewResults = interviewResultRepository.findAllByInterview(interview);
                     // ✅ AvgScoreService를 호출하여 평균 점수 계산
-                    AvgScoreDto avgScore = avgScoreService.calculateAverageScores(interviewResults);
+                    AvgScoreDto avgScore = interviewResultRepository.findAllAverageScores().orElseThrow(() -> new BusinessException(ErrorCode.AVAERAGE_ERROR));
                     return InterviewResponseDto.fromEntity(interview, Collections.singletonList(avgScore));
                 })
                 .collect(Collectors.toList());
@@ -102,7 +105,7 @@ public class InterviewService {
 
         List<InterviewResult> interviewResults = interviewResultRepository.findAllByInterview(result);
         // ✅ AvgScoreService를 호출하여 평균 점수 계산
-        AvgScoreDto avgScore = avgScoreService.calculateAverageScores(interviewResults);
+        AvgScoreDto avgScore = interviewResultRepository.findAllAverageScores().orElseThrow(() -> new BusinessException(ErrorCode.AVAERAGE_ERROR));
         return InterviewResponseDto.fromEntity(result, Collections.singletonList(avgScore));
     }
 
