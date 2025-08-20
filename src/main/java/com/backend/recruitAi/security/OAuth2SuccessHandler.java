@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,6 +38,14 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     @Value("${app.frontend.url}")
     private String frontendUrl;
 
+    private static final SecureRandom RNG = new SecureRandom();
+
+    private String newRtid() {
+        byte[] buf = new byte[32];
+        RNG.nextBytes(buf);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(buf);
+    }
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
@@ -47,14 +57,22 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = jwtTokenProvider.createAccessToken(email, member.getRole());
         String refreshToken = jwtTokenProvider.createRefreshToken(email, member.getRole());
 
-        refreshTokenService.saveRefreshToken(email, refreshToken);
+        String rtid = newRtid();
 
+        refreshTokenService.saveRefreshToken(rtid, refreshToken);
         Cookie accessCookie = new Cookie("accessToken", accessToken);
         accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(true);
+        accessCookie.setSecure(false);
         accessCookie.setPath("/");
         accessCookie.setMaxAge(60 * 30); // 30분
         response.addCookie(accessCookie);
+
+        Cookie rtidCookie  = new Cookie("rtid", rtid);
+        rtidCookie .setHttpOnly(true);
+        rtidCookie .setSecure(false);
+        rtidCookie .setPath("/");
+        rtidCookie .setMaxAge(60 * 60 * 24 * 7);
+        response.addCookie(rtidCookie );
 
         String redirectUri = String.format(
                 "%s/oauth/success?email=%s&provider=%s&name=%s",
