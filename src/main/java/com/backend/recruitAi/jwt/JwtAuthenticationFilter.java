@@ -32,6 +32,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
+        // 1) 모바일/웹 공통: Authorization 헤더 우선
+        String bearer = request.getHeader("Authorization");
+        if (bearer != null && bearer.startsWith("Bearer ")) {
+            return bearer.substring(7);
+        }
+        // (선택) 커스텀 헤더도 지원하려면
+        String direct = request.getHeader("X-ACCESS-TOKEN");
+        if (direct != null && !direct.isBlank()) return direct;
+
+        // 2) 웹 전용: HttpOnly 쿠키
         if (request.getCookies() != null) {
             for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
                 if ("accessToken".equals(cookie.getName())) {

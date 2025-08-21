@@ -68,6 +68,18 @@ public class DataInitRunner implements CommandLineRunner {
                             .role(Role.ROLE_ADMIN)
                             .build()
             ));
+            Member TestMember = memberRepository.save(Member.builder()
+                    .email("c@c.com")
+                    .name("박세훈")
+                    .password(passwordEncoder.encode("123"))
+                    .postcode("08501")
+                    .address1("서울특별시 관악구 신림로")
+                    .address2("303호")
+                    .gender(GenderType.MALE)
+                    .birth(LocalDate.of(2000, 8, 11))
+                    .provider(Provider.LOCAL)
+                    .role(Role.ROLE_USER)
+                    .build());
 
             Member kakaoMember = memberRepository.save(Member.builder()
                     .email("ajtwlstpgns@naver.com")
@@ -86,7 +98,7 @@ public class DataInitRunner implements CommandLineRunner {
 
             // ✅ 첫 번째 인터뷰 저장
             Interview interview1 = Interview.builder()
-                    .member(kakaoMember)
+                    .member(TestMember)
                     .uuid(UUID.randomUUID().toString())
                     .createdAt(LocalDateTime.now().minusHours(24))
                     .job("백엔드 개발자")
@@ -135,7 +147,7 @@ public class DataInitRunner implements CommandLineRunner {
 
             // ✅ 두 번째 인터뷰 저장
             Interview interview2 = Interview.builder()
-                    .member(kakaoMember)
+                    .member(TestMember)
                     .uuid(UUID.randomUUID().toString())
                     .createdAt(LocalDateTime.now())
                     .job("백엔드 개발자")
@@ -143,7 +155,7 @@ public class DataInitRunner implements CommandLineRunner {
                     .type(InterviewType.MIXED)
                     .level(Level.상)
                     .language(Language.KOREAN)
-                    .count(0)
+                    .count(3)
                     .build();
 
             InterviewResult answer2_1 = InterviewResult.builder()

@@ -108,6 +108,30 @@ public class AuthController {
         return ResponseDto.success(loginResponseDto);
     }
 
+    @PostMapping("/mobile/login")
+    public ResponseDto<LoginTokensDto> mobileLogin(@RequestBody LoginRequest request) {
+        Member member = memberRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        String accessToken = jwtTokenProvider.createAccessToken(member.getEmail(), member.getRole());
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.getEmail(), member.getRole());
+
+        String rtid = newRtid();
+        refreshTokenService.saveRefreshToken(rtid, refreshToken); // 기존 로직 그대로
+
+        // 앱은 쿠키를 못 쓰니 바디로 내려준다
+        LoginTokensDto body = new LoginTokensDto(
+                accessToken,
+                rtid,                 // ↔ refreshToken 중 하나를 택해서 내려도 됨
+                new LoginResponseDto(member) // 유저 프로필도 같이 주고 싶으면
+        );
+        return ResponseDto.success(body);
+    }
+
     @PostMapping("/reissue")
     public ResponseDto<?> reissueToken(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
@@ -196,7 +220,38 @@ public class AuthController {
 
         return ResponseDto.success("로그아웃 완료");
     }
-    
+    private static String firstNonNull(String... values) {
+        for (String v : values) {
+            if (v != null && !v.isEmpty()) return v;
+        }
+        return null;
+    }
+
+    @PostMapping("/mobile/reissue")
+    public ResponseDto<TokenOnlyOrWithRtidDto> mobileReissue(@RequestBody Map<String,String> body,
+                                                             @RequestHeader(value="X-RTID", required=false) String rtidHeader) {
+        String rtid = firstNonNull(rtidHeader, body != null ? body.get("rtid") : null);
+        if (rtid == null) throw new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
+
+        String refresh = refreshTokenService.getRefreshToken(rtid);
+        if (refresh == null || !jwtTokenProvider.validateToken(refresh)) {
+            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        String email = jwtTokenProvider.getEmail(refresh);
+        Role role   = jwtTokenProvider.getRole(refresh);
+
+        String newAccess  = jwtTokenProvider.createAccessToken(email, role);
+        String newRefresh = jwtTokenProvider.createRefreshToken(email, role);
+        String newRtid    = newRtid();
+
+        refreshTokenService.saveRefreshToken(newRtid, newRefresh);
+        refreshTokenService.deleteRefreshToken(rtid);
+
+        return ResponseDto.success(new TokenOnlyOrWithRtidDto(newAccess, newRtid));
+    }
+
+
     @GetMapping("/me")
     public ResponseDto<?> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Member member = userDetails.getMember(); // 또는 userDetails.getUsername(), getAuthorities() 등
