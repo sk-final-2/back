@@ -30,15 +30,15 @@ public class InterviewResult {
     private String question;
 
     @Lob // 긴 텍스트를 저장하기 위해 CLOB 타입으로 매핑
-    @Column(name = "interview_answer", nullable = false) // 답변내용
+    @Column(name = "interview_answer", nullable = false, columnDefinition = "LONGTEXT") // 답변내용
     private String answer;
 
     @Lob
-    @Column(name = "interview_answer_good", nullable = false) // 잘한점
+    @Column(name = "interview_answer_good", nullable = false, columnDefinition = "LONGTEXT") // 잘한점
     private String good;
 
     @Lob
-    @Column(name = "interview_answer_bad", nullable = false) // 못한점
+    @Column(name = "interview_answer_bad", nullable = false, columnDefinition = "LONGTEXT") // 못한점
     private String bad;
 
     @Column(name = "score", nullable = false)
