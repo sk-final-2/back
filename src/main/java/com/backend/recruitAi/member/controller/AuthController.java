@@ -281,4 +281,16 @@ public class AuthController {
         }
     }
 
+    @DeleteMapping("/me")
+    public ResponseDto<?> deleteMyAccount(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        Member member = userDetails.getMember();
+        memberRepository.delete(member);
+
+        return ResponseDto.success("계정이 삭제되었습니다");
+    }
+
 }
