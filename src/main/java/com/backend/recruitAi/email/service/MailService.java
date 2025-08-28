@@ -19,7 +19,7 @@ public class MailService {
     public void sendVerificationMail(String to, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
-        message.setSubject("[RecruitAi] 이메일 인증 코드");
+        message.setSubject("[Re:Ai] 이메일 인증 코드");
         message.setText("인증 코드는: " + code + "입니다." + "\n유효시간 3분 안에 인증해주세요😎");
 
         //도메인 확인 후 전송
