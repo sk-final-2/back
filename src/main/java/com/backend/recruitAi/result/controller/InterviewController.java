@@ -5,10 +5,15 @@ import com.backend.recruitAi.global.exception.ErrorCode;
 import com.backend.recruitAi.global.response.ResponseDto;
 import com.backend.recruitAi.result.dto.InterviewRequestDto;
 import com.backend.recruitAi.result.dto.InterviewResponseDto;
+import com.backend.recruitAi.result.dto.PageResponse;
 import com.backend.recruitAi.result.service.InterviewService;
 import com.backend.recruitAi.member.service.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,6 +55,19 @@ public class InterviewController {
         List<InterviewResponseDto> responseDtos = interviewService.getAllInterviewResults(userDetails.getMember().getId());
         return ResponseDto.success(responseDtos);
     }
+    @GetMapping("/paged")
+    public ResponseDto<PageResponse<InterviewResponseDto>> getInterviewResultsPaged(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        if (userDetails == null || userDetails.getMember() == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        Page<InterviewResponseDto> page = interviewService.getAllInterviewResults(userDetails.getMember().getId(), pageable);
+        return ResponseDto.success(PageResponse.from(page));
+    }
+
 
     @GetMapping("/{interviewId}")
     public ResponseDto<InterviewResponseDto> getInterviewResultById(

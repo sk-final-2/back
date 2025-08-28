@@ -12,6 +12,7 @@ import com.backend.recruitAi.interview.repository.InterviewRepository;
 import com.backend.recruitAi.member.entity.Member;
 import com.backend.recruitAi.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +21,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.Collections;
-
+import org.springframework.data.domain.Pageable;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -90,12 +91,27 @@ public class InterviewService {
         return results.stream()
                 .map(interview -> {
                     List<InterviewResult> interviewResults = interviewResultRepository.findAllByInterview(interview);
-                    // ✅ AvgScoreService를 호출하여 평균 점수 계산
                     AvgScoreDto avgScore = interviewResultRepository.findAllAverageScores().orElseThrow(() -> new BusinessException(ErrorCode.AVAERAGE_ERROR));
                     return InterviewResponseDto.fromEntity(interview, Collections.singletonList(avgScore));
                 })
                 .collect(Collectors.toList());
     }
+
+    // 페이징 버전
+    public Page<InterviewResponseDto> getAllInterviewResults(Long memberId, Pageable pageable) {
+        Page<Interview> page = interviewRepository.findAllByMemberId(memberId, pageable);
+
+        // 평균 점수는 기존 로직을 그대로 따름(전체 평균으로 보임)
+        AvgScoreDto avgScore = interviewResultRepository
+                .findAllAverageScores()
+                .orElseThrow(() -> new BusinessException(ErrorCode.AVAERAGE_ERROR));
+
+        return page.map(interview -> InterviewResponseDto.fromEntity(
+                interview,
+                Collections.singletonList(avgScore)
+        ));
+    }
+
 
 
     // 특정 ID의 인터뷰 결과 조회
