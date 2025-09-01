@@ -9,7 +9,11 @@ public class LoginResponseDto {
     String email;
     String name;
     Provider provider;
+    String formattedDate;
+    String reasonMessage;
 
+    public LoginResponseDto(){
+    }
     public LoginResponseDto(Member member){
         this.email=member.getEmail();
         this.name = member.getName();

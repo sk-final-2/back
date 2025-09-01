@@ -55,6 +55,17 @@ public class Member {
     @Column(name = "provider_id", length = 255)
     private String providerId;
 
+    // ✅ 추가: 계정 정지 여부 필드
+    @Builder.Default
+    private boolean suspended = false;
+
+    private LocalDateTime suspendedAt; // ✅ 정지 시작일
+
+    private LocalDateTime suspendedUntil; // ✅ 정지 해제일
+
+    // ✅ 추가: 계정 정지 사유 필드
+    @Column(length = 255)
+    private String suspendedReason;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
