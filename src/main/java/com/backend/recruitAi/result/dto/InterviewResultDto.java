@@ -31,7 +31,7 @@ public class InterviewResultDto {
     private String bad;
 
     @NotNull(message = "총 점수는 필수입니다.")
-    private int score;
+    private Double score;
 
     private String emotionText;
 
