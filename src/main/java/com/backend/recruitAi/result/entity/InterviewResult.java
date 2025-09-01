@@ -42,7 +42,7 @@ public class InterviewResult {
     private String bad;
 
     @Column(name = "score", nullable = false)
-    private int score;
+    private Double score;
 
     @Lob
     @Column(name = "emotion_text", nullable = true, columnDefinition = "TEXT")
@@ -53,17 +53,17 @@ public class InterviewResult {
     private String mediapipe_text;
 
     @Column(name = "emotion_score", nullable = false)
-    private int emotion_score;
+    private Double emotion_score;
 
     @Column(name = "blink_score", nullable = false)
-    private int blink_score;
+    private Double blink_score;
 
     @Column(name = "eye_score", nullable = false)
-    private int eye_score;
+    private Double eye_score;
 
     @Column(name = "head_score", nullable = false)
-    private int head_score;
+    private Double head_score;
 
     @Column(name = "hand_score", nullable = false)
-    private int hand_score;
+    private Double hand_score;
 }

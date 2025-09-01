@@ -51,14 +51,14 @@ public class ResultService {
                     .answer((String) data.getOrDefault("answer", ""))
                     .good((String) data.getOrDefault("good", ""))
                     .bad((String) data.getOrDefault("bad", ""))
-                    .score(parseIntOrDefault(data.get("sttScore"), 0))
-                    .emotion_score(parseIntOrDefault(data.get("emotionScore"), 0))
+                    .score(parseDoubleOrDefault(data.get("sttScore"), 0))
+                    .emotion_score(parseDoubleOrDefault(data.get("emotionScore"), 0))
                     .emotion_text((String) data.getOrDefault("emotionText", null))
                     .mediapipe_text((String) data.getOrDefault("trackingText", null))
-                    .blink_score(parseIntOrDefault(data.get("blinkScore"), 0))
-                    .eye_score(parseIntOrDefault(data.get("eyeScore"), 0))
-                    .head_score(parseIntOrDefault(data.get("headScore"), 0))
-                    .hand_score(parseIntOrDefault(data.get("handScore"), 0))
+                    .blink_score(parseDoubleOrDefault(data.get("blinkScore"), 0))
+                    .eye_score(parseDoubleOrDefault(data.get("eyeScore"), 0))
+                    .head_score(parseDoubleOrDefault(data.get("headScore"), 0))
+                    .hand_score(parseDoubleOrDefault(data.get("handScore"), 0))
                     .build();
             results.add(result);
         }
@@ -118,14 +118,14 @@ public class ResultService {
                     .answer((String) data.getOrDefault("answer", ""))
                     .good((String) data.getOrDefault("good", ""))
                     .bad((String) data.getOrDefault("bad", ""))
-                    .score(parseIntOrDefault(data.get("sttScore"), 0))
+                    .score(parseDoubleOrDefault(data.get("sttScore"), 0))
                     .emotionText((String) data.getOrDefault("emotionText", null))
                     .mediapipeText((String) data.getOrDefault("trackingText", null))
-                    .emotionScore(parseIntOrDefault(data.get("emotionScore"), 0))
-                    .blinkScore(parseIntOrDefault(data.get("blinkScore"), 0))
-                    .eyeScore(parseIntOrDefault(data.get("eyeScore"), 0))
-                    .headScore(parseIntOrDefault(data.get("headScore"), 0))
-                    .handScore(parseIntOrDefault(data.get("handScore"), 0))
+                    .emotionScore(parseDoubleOrDefault(data.get("emotionScore"), 0))
+                    .blinkScore(parseDoubleOrDefault(data.get("blinkScore"), 0))
+                    .eyeScore(parseDoubleOrDefault(data.get("eyeScore"), 0))
+                    .headScore(parseDoubleOrDefault(data.get("headScore"), 0))
+                    .handScore(parseDoubleOrDefault(data.get("handScore"), 0))
                     .timestamp(timestamps)
                     .build();
 
@@ -194,6 +194,20 @@ public class ResultService {
     private int parseIntOrDefault(Object value, int defaultVal) {
         try { return Integer.parseInt(value.toString()); }
         catch (Exception e) { return defaultVal; }
+    }
+    private double parseDoubleOrDefault(Object value, double defaultVal) {
+        if (value == null) return defaultVal;
+        try {
+            if (value instanceof Number) {
+                double v = ((Number) value).doubleValue();
+                return Double.isFinite(v) ? v : defaultVal;
+            }
+            String s = value.toString().trim().replace(",", "");
+            double v = Double.parseDouble(s);
+            return Double.isFinite(v) ? v : defaultVal;
+        } catch (Exception e) {
+            return defaultVal;
+        }
     }
 
 }

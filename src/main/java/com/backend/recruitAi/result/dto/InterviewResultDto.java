@@ -38,15 +38,15 @@ public class InterviewResultDto {
     private String mediapipeText;
 
     @NotNull(message = "감정 점수는 필수입니다.")
-    private int emotionScore;
+    private Double emotionScore;
 
-    private Integer blinkScore;
+    private Double blinkScore;
 
-    private Integer eyeScore;
+    private Double eyeScore;
 
-    private Integer headScore;
+    private Double headScore;
 
-    private Integer handScore;
+    private Double handScore;
 
     public static InterviewResultDto fromEntity(InterviewResult entity) {
         return InterviewResultDto.builder()

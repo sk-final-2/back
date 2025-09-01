@@ -32,22 +32,22 @@ public class InterviewTempResultDto {
     private String bad;
 
     @NotNull(message = "총 점수는 필수입니다.")
-    private int score;
+    private Double score;
 
     private String emotionText;
 
     private String mediapipeText;
 
     @NotNull(message = "감정 점수는 필수입니다.")
-    private int emotionScore;
+    private Double emotionScore;
 
-    private Integer blinkScore;
+    private Double blinkScore;
 
-    private Integer eyeScore;
+    private Double eyeScore;
 
-    private Integer headScore;
+    private Double headScore;
 
-    private Integer handScore;
+    private Double handScore;
 
     private List<TimeStampDto> timestamp;
 
