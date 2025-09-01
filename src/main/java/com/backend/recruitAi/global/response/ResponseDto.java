@@ -42,4 +42,13 @@ public class ResponseDto<T> {
                 .data(null)
                 .build();
     }
+
+    public static <T> ResponseDto<T> error(ErrorCode errorCode,T data) {
+        return ResponseDto.<T>builder()
+                .status(errorCode.getStatus())
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .data(data)
+                .build();
+    }
 }

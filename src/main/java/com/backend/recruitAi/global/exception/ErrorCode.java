@@ -23,6 +23,7 @@ public enum ErrorCode {
     EMAIL_ALREADY_VERIFIED(400, "EMAIL004", "이미 인증된 이메일입니다."),
     EMAIL_CODE_EXPIRED(400, "EMAIL005", "이메일 인증 코드가 만료되었습니다."),
     MAIL_SEND_FAILED(500, "EMAIL006", "이메일 전송 중 오류가 발생했습니다."),
+    ACCOUNT_SUSPENDED(403, "AUTH007", "정지된 계정입니다."),
 
     //OCR 오류
     FILE_PROCESSING_FAILED(500, "FILE001", "파일 처리 중 오류가 발생했습니다."),

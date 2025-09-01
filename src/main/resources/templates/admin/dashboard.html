@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Re:AI Admin</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>Re:AI</h2>
+  <button class="nav-button active" data-target="dashboard-section"><i class="fas fa-tachometer-alt"></i> 대시 보드</button>
+  <button class="nav-button" data-target="member-section"><i class="fas fa-users"></i> 회원 관리</button>
+  <button class="nav-button" data-target="stats-section"><i class="fas fa-chart-bar"></i> 통계 분석</button>
+</div>
+
+<div class="main-header">
+  <div class="user-info">
+    <button id="logoutBtn" class="logout-btn">로그아웃</button>
+  </div>
+</div>
+
+<div class="main-content">
+  <div id="dashboard-section" class="content-section">
+    <div class="page-header">
+      <i class="fas fa-tachometer-alt header-icon-fa"></i>
+      <h1>관리자 대시보드</h1>
+    </div>
+
+    <div class="summary-card-grid">
+      <div class="summary-card">
+        <div class="icon-wrapper"><i class="fas fa-users"></i></div>
+        <h4>총 회원 수</h4>
+        <div class="value" id="totalMembers">...</div>
+      </div>
+      <div class="summary-card">
+        <div class="icon-wrapper"><i class="fas fa-user-check"></i></div>
+        <h4>활성 회원 수</h4>
+        <div class="value" id="activeMembers">...</div>
+      </div>
+      <div class="summary-card">
+        <div class="icon-wrapper"><i class="fas fa-user-plus"></i></div>
+        <h4>금일 신규 가입자</h4>
+        <div class="value" id="todayNewMembers">...</div>
+      </div>
+      <div class="summary-card full-width">
+        <div class="icon-wrapper"><i class="fas fa-laptop-code"></i></div>
+        <h4>총 면접 시도 횟수</h4>
+        <div class="value" id="totalInterviews">...</div>
+      </div>
+    </div>
+    <div class="chart-grid">
+      <div class="card chart-card">
+        <h3><i class="fas fa-chart-line"></i>최근 7일 신규 가입자</h3>
+        <canvas id="dailyChart"></canvas>
+      </div>
+      <div class="card chart-card">
+        <h3><i class="fas fa-chart-bar"></i> 회원 상태 비율</h3>
+        <div style="width: 70%; margin: auto;">
+          <canvas id="statusPieChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="member-section" class="content-section" style="display: none;">
+    <h1>
+      <i class="fa-solid fa-user-tie"></i> 회원 관리
+    </h1>
+    <div class="card">
+      <h3>
+        <i class="fa-solid fa-magnifying-glass"></i> 회원 검색
+      </h3>
+      <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+        <label for="searchIdInput">ID로 검색:</label>
+        <input type="text" id="searchIdInput" placeholder="회원 ID 입력" style="width: 150px;">
+        <input type="text" id="searchInput" placeholder="이름 또는 이메일로 검색" style="flex-grow: 1;">
+        <button id="searchButton" class="action-btn btn-primary">검색</button>
+        <button id="clearButton" class="action-btn btn-secondary">전체 목록</button>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3><i class="fa-solid fa-list"></i> 회원 목록</h3>
+        <div class="filter-buttons">
+          <button id="allUsersBtn" class="action-btn btn-secondary active-filter">전체 회원</button>
+          <button id="activeUsersBtn" class="action-btn btn-primary">활성 회원</button>
+          <button id="suspendedUsersBtn" class="action-btn btn-danger">정지 회원</button>
+        </div>
+      </div>
+      <div id="member-table-container">
+        <table>
+          <thead>
+          <tr>
+            <th id="idHeader" style="cursor: pointer;">ID <span id="sortIndicator"></span></th>
+            <th>이메일</th>
+            <th>이름</th>
+            <th>계정 상태</th>
+            <th>정지 사유</th>
+            <th>가입일</th>
+            <th>계정 상태</th>
+          </tr>
+          </thead>
+          <tbody id="member-table-body">
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination-container" style="display: flex; justify-content: center; align-items: center; margin-top: 20px;">
+        <button id="prevBtn" class="action-btn btn-secondary">이전</button>
+        <span id="pageInfo" style="margin: 0 15px;">페이지 1 / 1</span>
+        <button id="nextBtn" class="action-btn btn-secondary">다음</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="stats-section" class="content-section" style="display: none;">
+    <h1>
+      <i class="fa-solid fa-chart-simple"></i> 통계 분석
+    </h1>
+    <div class="card">
+      <h3><i class="fas fa-chart-line"></i> 기간별 통계</h3>
+      <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px;">
+        <input type="date" id="startDate">
+        ~
+        <input type="date" id="endDate">
+        <button onclick="updateChartsFull()" class="action-btn btn-primary">적용</button>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="card chart-card">
+        <h3><i class="fas fa-chart-bar"></i> 일별 가입자 수</h3>
+        <canvas id="dailyChart-full"></canvas>
+      </div>
+      <div class="card chart-card">
+        <h3><i class="fas fa-chart-bar"></i> 월별 가입자 수</h3>
+        <canvas id="monthlyChart-full"></canvas>
+      </div>
+    </div>
+    <div class="chart-grid">
+      <div class="card chart-card">
+        <h3><i class="fas fa-chart-line"></i> 일별 면접 시도 횟수</h3>
+        <canvas id="dailyInterviewChart"></canvas>
+      </div>
+      <div class="card chart-card">
+        <h3><i class="fas fa-chart-line"></i> 월별 면접 시도 횟수</h3>
+        <canvas id="monthlyInterviewChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div> <div id="suspendModal" style="display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+  <div style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 400px; border-radius: 10px;">
+    <h3>회원 정지 사유 선택</h3>
+    <p>정지 사유를 선택하거나 직접 입력해주세요.</p>
+    <select id="suspendReasonDropdown" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
+      <option value="">사유 선택</option>
+      <option value="부적절한 콘텐츠 게시">부적절한 콘텐츠 게시</option>
+      <option value="서비스 약관 위반">서비스 약관 위반</option>
+      <option value="스팸 활동">스팸 활동</option>
+      <option value="기타">기타 (직접 입력)</option>
+    </select>
+    <input type="text" id="suspendReasonInput" placeholder="기타 사유를 입력하세요" style="display: none; width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
+    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+      <div style="margin-top: 10px;">
+        <label>정지 해제 날짜:</label>
+        <input type="date" id="suspendUntilDateInput" required />
+      </div>
+      <button id="confirmSuspendBtn" class="action-btn btn-warning">확인</button>
+      <button id="cancelSuspendBtn" class="action-btn btn-secondary">취소</button>
+    </div>
+  </div>
+</div>
+
+<script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/dashboard.js}"></script>
+<script th:src="@{/js/member.js}"></script>
+<script th:src="@{/js/stats.js}"></script>
+
+</body>
+</html>

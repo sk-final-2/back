@@ -27,6 +27,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.Base64;
 import java.util.Map;
@@ -81,6 +83,26 @@ public class AuthController {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
+        if (member.isSuspended()) {
+            LocalDateTime suspendedUntil = member.getSuspendedUntil();
+            String suspendedReason = member.getSuspendedReason(); // 정지 사유 가져오기
+
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json;charset=UTF-8");
+
+            String formattedDate = suspendedUntil != null
+                    ? suspendedUntil.format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"))
+                    : "알 수 없음";
+
+            String reasonMessage = suspendedReason != null && !suspendedReason.isEmpty()
+                    ? "사유: " + suspendedReason
+                    : "사유: 없음";
+
+            LoginResponseDto memberSuspendDto = new LoginResponseDto();
+            memberSuspendDto.setFormattedDate(formattedDate);
+            memberSuspendDto.setReasonMessage(reasonMessage);
+            return ResponseDto.error(ErrorCode.ACCOUNT_SUSPENDED,memberSuspendDto); // 정지된 계정임을 나타내는 에러코드
+        }
         String accessToken = jwtTokenProvider.createAccessToken(member.getEmail(), member.getRole());
         String refreshToken = jwtTokenProvider.createRefreshToken(member.getEmail(), member.getRole());
 

@@ -210,6 +210,38 @@ public class DataInitRunner implements CommandLineRunner {
             interviewRepository.save(interview2);
             System.out.println("✅ 두 번째 Interview 저장 완료: ID = " + interview2.getId());
 
+            // ✅ 세 번째 인터뷰 저장 (테스트용)
+            Interview interview3 = Interview.builder()
+                    .member(kakaoMember) // 또는 다른 멤버 사용
+                    .uuid(UUID.randomUUID().toString())
+                    .createdAt(LocalDateTime.now()) // 현재 시간으로 설정
+                    .job("프론트엔드 개발자")
+                    .career("신입")
+                    .type(InterviewType.TECHNICAL)
+                    .level(Level.하)
+                    .language(Language.KOREAN)
+                    .count(0)
+                    .build();
+
+            InterviewResult answer3_1 = InterviewResult.builder()
+                    .seq(1)
+                    .question("React Hooks에 대해 설명해주세요.")
+                    .answer("React Hooks는 함수형 컴포넌트에서 상태와 생명주기 기능을 사용할 수 있게 하는...")
+                    .good("핵심 개념을 잘 설명했습니다.")
+                    .bad("구체적인 예시 코드가 부족했습니다.")
+                    .score(88)
+                    .emotion_score(90)
+                    .mediapipe_text("last_text")
+                    .blink_score(81)
+                    .eye_score(88)
+                    .head_score(79)
+                    .hand_score(81)
+                    .interview(interview3)
+                    .build();
+
+            interview3.setAnswerAnalyses(Arrays.asList(answer3_1));
+            interviewRepository.save(interview3);
+            System.out.println("✅ 세 번째 Interview 저장 완료: ID = " + interview3.getId());
             System.out.println("--- 샘플 인터뷰 데이터 초기화 완료 ---");
         }
     }
