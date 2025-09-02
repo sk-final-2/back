@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InterviewResultDto {
-    private Long id;
 
     @NotNull(message = "순번은 필수입니다.")
     private int seq;
@@ -50,7 +49,6 @@ public class InterviewResultDto {
 
     public static InterviewResultDto fromEntity(InterviewResult entity) {
         return InterviewResultDto.builder()
-                .id(entity.getId())
                 .seq(entity.getSeq())
                 .question(entity.getQuestion())
                 .answer(entity.getAnswer())
