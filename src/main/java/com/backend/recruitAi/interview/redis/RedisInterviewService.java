@@ -55,6 +55,8 @@ public class RedisInterviewService {
         redisTemplate.opsForHash().put(key, "eyeScore", tracking.get("eyeScore"));
         redisTemplate.opsForHash().put(key, "headScore", tracking.get("headScore"));
         redisTemplate.opsForHash().put(key, "handScore", tracking.get("handScore"));
+        System.out.println(tracking.get("text"));
+        System.out.println(tracking.get("timestamp"));
         Object timestamps = tracking.get("timestamp"); // ex) List<Map<String, String>>
         if (timestamps != null) {
             redisTemplate.opsForHash().put(key, "trackingTimestamps", timestamps);
