@@ -2,6 +2,7 @@ package com.backend.recruitAi.interview.repository;
 
 import com.backend.recruitAi.interview.entity.Interview;
 import com.backend.recruitAi.member.entity.Member;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,8 +17,12 @@ import java.util.Optional;
 public interface InterviewRepository extends JpaRepository<Interview, Long> {
 
     List<Interview> findAllByMemberId(Long memberId);
+
+    @EntityGraph(attributePaths = {"answerAnalyses"})
     Optional<Interview> findByIdAndMemberId(Long id, Long memberId);
+
     Optional<Interview> findByUuid(String uuid);
+
     @Query(value = "WITH RECURSIVE dates AS ( " +
             "    SELECT :startDate AS date " +
             "    UNION ALL " +

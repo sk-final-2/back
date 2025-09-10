@@ -5,6 +5,7 @@ import com.backend.recruitAi.global.exception.ErrorCode;
 import com.backend.recruitAi.result.dto.AvgScoreDto;
 import com.backend.recruitAi.result.dto.InterviewRequestDto;
 import com.backend.recruitAi.result.dto.InterviewResponseDto;
+import com.backend.recruitAi.result.dto.JobAvgScoreDto;
 import com.backend.recruitAi.result.entity.InterviewResult;
 import com.backend.recruitAi.interview.entity.Interview;
 import com.backend.recruitAi.result.repository.InterviewResultRepository;
@@ -15,11 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -74,7 +72,14 @@ public class InterviewService {
         savedResult.setAnswerAnalyses(answerAnalyses);
 
         //AvgScoreDto avgScore = avgScoreService.calculateAverageScores(answerAnalyses);
-        AvgScoreDto avgScore = interviewResultRepository.findAllAverageScores().orElseThrow(() -> new BusinessException(ErrorCode.AVAERAGE_ERROR));
+        //AvgScoreDto avgScore = interviewResultRepository.findAllAverageScores().orElseThrow(() -> new BusinessException(ErrorCode.AVAERAGE_ERROR));
+        // 직무별 평균 점수 계산
+        AvgScoreDto avgScore = Optional.ofNullable(
+                avgScoreService.getAvgByJob(interview.getJob())).orElseThrow(() -> new BusinessException(ErrorCode.AVERAGE_ERROR));
+
+        // 쓰기 후 캐시 무효화(커밋 후부터 새 값으로 다시 채워짐)
+        avgScoreService.evictByInterview(interview);
+
         return InterviewResponseDto.fromEntity(savedResult, Collections.singletonList(avgScore));
     }
 
@@ -87,14 +92,43 @@ public class InterviewService {
     // 모든 인터뷰 결과 조회
     public List<InterviewResponseDto> getAllInterviewResults(Long memberId) {
         List<Interview> results = interviewRepository.findAllByMemberId(memberId);
+        if (results.isEmpty()) return Collections.emptyList();
+
+        // 1) 응답에 필요한 직무 키들을 표준화해서 수집 (UPPER(TRIM))
+        Set<String> jobKeys = results.stream()
+                .map(Interview::getJob)
+                .filter(Objects::nonNull)
+                .map(this::normJobKey) // UPPER + TRIM
+                .collect(Collectors.toSet());
+
+        // 2) 한 번의 쿼리로 모든 직무 평균 가져오기
+        List<JobAvgScoreDto> grouped = interviewResultRepository.findAverageScoresByJobs(jobKeys);
+
+        // 3) 직무키 -> AvgScoreDto 매핑
+        Map<String, AvgScoreDto> avgMap = grouped.stream()
+                .collect(Collectors.toMap(
+                        JobAvgScoreDto::getJob, // 이미 UPPER(TRIM) 형태로 반환됨
+                        j -> new AvgScoreDto(
+                                j.getScore(), j.getEmotionScore(),
+                                j.getBlinkScore(), j.getEyeScore(),
+                                j.getHeadScore(), j.getHandScore()
+                        )
+                ));
+
+        // 4) 인터뷰별로 평균 붙여 응답 생성
         return results.stream()
-                .map(interview -> {
-                    List<InterviewResult> interviewResults = interviewResultRepository.findAllByInterview(interview);
-                    // ✅ AvgScoreService를 호출하여 평균 점수 계산
-                    AvgScoreDto avgScore = interviewResultRepository.findAllAverageScores().orElseThrow(() -> new BusinessException(ErrorCode.AVAERAGE_ERROR));
-                    return InterviewResponseDto.fromEntity(interview, Collections.singletonList(avgScore));
+                .map(iv -> {
+                    String key = normJobKey(iv.getJob());
+                    AvgScoreDto avg = avgMap.get(key);
+                    if (avg == null) throw new BusinessException(ErrorCode.AVERAGE_ERROR);
+                    return InterviewResponseDto.fromEntity(iv, Collections.singletonList(avg));
                 })
                 .collect(Collectors.toList());
+    }
+
+    // 키 표준화: UPPER(TRIM(job))와 동일하게
+    private String normJobKey(String job) {
+        return job == null ? null : job.trim().toUpperCase();
     }
 
 
@@ -103,9 +137,13 @@ public class InterviewService {
         Interview result = interviewRepository.findByIdAndMemberId(id, memberId)
                 .orElseThrow(() -> new NoSuchElementException("인터뷰 결과를 찾을 수 없거나 권한이 없습니다."));
 
-        List<InterviewResult> interviewResults = interviewResultRepository.findAllByInterview(result);
+        //List<InterviewResult> interviewResults = interviewResultRepository.findAllByInterview(result);
         // ✅ AvgScoreService를 호출하여 평균 점수 계산
-        AvgScoreDto avgScore = interviewResultRepository.findAllAverageScores().orElseThrow(() -> new BusinessException(ErrorCode.AVAERAGE_ERROR));
+        //AvgScoreDto avgScore = interviewResultRepository.findAllAverageScores().orElseThrow(() -> new BusinessException(ErrorCode.AVAERAGE_ERROR));
+        // 직무별 평균 점수 계산
+        AvgScoreDto avgScore = Optional.ofNullable(
+                avgScoreService.getAvgByJob(result.getJob())).orElseThrow(() -> new BusinessException(ErrorCode.AVERAGE_ERROR));
+
         return InterviewResponseDto.fromEntity(result, Collections.singletonList(avgScore));
     }
 

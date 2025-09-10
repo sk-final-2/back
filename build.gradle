@@ -52,6 +52,8 @@ dependencies {
 	//redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8'
+	//cache
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
 
 	//웹소켓 관련
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
