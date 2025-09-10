@@ -77,6 +77,9 @@ public class ResultService {
         // DB 저장
         interviewResultRepository.saveAll(results);
 
+        // 캐시 무효화
+        avgScoreService.evictByInterview(interview);
+
         // Redis 데이터 정리
         for (int i = 1; i <= lastSeq; i++) {
             redisTemplate.delete(baseKey + ":seq:" + i);
@@ -135,7 +138,10 @@ public class ResultService {
         }
 
         // 전체 평균 점수 1건 계산
-        AvgScoreDto avgScore = interviewResultRepository.findAllAverageScores().orElseThrow(() -> new BusinessException(ErrorCode.AVAERAGE_ERROR));
+        //AvgScoreDto avgScore = interviewResultRepository.findAllAverageScores().orElseThrow(() -> new BusinessException(ErrorCode.AVAERAGE_ERROR));
+        // 직무별 평균 점수 계산
+        AvgScoreDto avgScore = Optional.ofNullable(
+                avgScoreService.getAvgByJob(interview.getJob())).orElseThrow(() -> new BusinessException(ErrorCode.AVERAGE_ERROR));
 
         // 최종 응답 래핑
         return InterviewTempResponseDto.of(
