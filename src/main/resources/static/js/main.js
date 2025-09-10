@@ -14,7 +14,7 @@ let allRows = [];
 const logoutButton = document.getElementById('logoutBtn');
 if (logoutButton) {
     logoutButton.addEventListener('click', function() {
-        window.location.href = 'http://localhost:8080/login';
+        window.location.href = '/login';
     });
 }
 
