@@ -6,6 +6,7 @@ import com.backend.recruitAi.global.response.ResponseDto;
 import com.backend.recruitAi.interview.dto.*;
 import com.backend.recruitAi.interview.service.*;
 import com.backend.recruitAi.interview.redis.RedisInterviewService;
+import com.backend.recruitAi.media.MediaStore;
 import com.backend.recruitAi.member.service.CustomUserDetails;
 import com.backend.recruitAi.result.dto.InterviewResponseDto;
 import com.backend.recruitAi.result.dto.InterviewResultDto;
@@ -37,7 +38,7 @@ public class InterviewAIController {
     private final ResultService resultService;
     private final TrackingService trackingService;
     private final TempMediaService tempMediaService;
-
+    private final MediaStore mediaStore;
     @PostMapping("/ocr")
     public ResponseDto<OcrResponseDto> ocrFromFile(@RequestPart("file") MultipartFile file) {
         try {
@@ -106,9 +107,10 @@ public class InterviewAIController {
                     .block();
 
             // 5) ★정상 흐름에서만 원본 영상 임시보관에 저장
-            tempMediaService.save(tempFile, interviewId, seq);
-            savedToMedia = true; // 보관 성공
-
+//            tempMediaService.save(tempFile, interviewId, seq);
+//            savedToMedia = true; // 보관 성공
+            mediaStore.save(tempFile, interviewId, seq);   // ✔ 여기로 교체
+            savedToMedia = true;
             return ResponseDto.success(new AnswerResponseDto(
                     interviewId,
                     (String) sttRes.get("new_question"),
