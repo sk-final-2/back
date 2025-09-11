@@ -1,10 +1,12 @@
-// LocalMediaStore.java  (dev)
+// src/main/java/com/backend/recruitAi/media/LocalMediaStore.java
 package com.backend.recruitAi.media;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
@@ -50,20 +52,30 @@ public class LocalMediaStore implements MediaStore {
         return new SaveResult(target.toString(), size, null);
     }
 
+    // ✅ dev에서 바로 스트리밍이 필요할 때 사용
     @Override
-    public StreamingResponseBody stream(String interviewId, int seq) {
+    public StreamingResponseBody stream(String interviewId, int seq) throws IOException {
         Meta m = meta.get(key(interviewId, seq));
-        if (m == null) return out -> { throw new FileNotFoundException("media not found"); };
+        if (m == null) throw new FileNotFoundException("media not found");
         File f = new File(m.path);
         if (!f.exists()) {
             meta.remove(key(interviewId, seq));
-            return out -> { throw new FileNotFoundException("media not found"); };
+            throw new FileNotFoundException("media not found");
         }
-        return out -> {
+        return os -> {
             try (InputStream in = new BufferedInputStream(new FileInputStream(f))) {
-                in.transferTo(out);
+                in.transferTo(os);
             }
         };
+    }
+
+    // ✅ dev에서 Resource 그대로 내려보내고 싶을 때 사용할 헬퍼
+    public Resource resolve(String interviewId, int seq) throws IOException {
+        Meta m = meta.get(key(interviewId, seq));
+        if (m == null) throw new FileNotFoundException("media not found");
+        File f = new File(m.path);
+        if (!f.exists()) throw new FileNotFoundException("media not found");
+        return new FileSystemResource(f);
     }
 
     @Override
