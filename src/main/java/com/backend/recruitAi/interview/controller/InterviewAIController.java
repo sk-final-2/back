@@ -39,6 +39,7 @@ public class InterviewAIController {
     private final TrackingService trackingService;
     private final TempMediaService tempMediaService;
     private final MediaStore mediaStore;
+    private final EvaluateService evaluateService;
     @PostMapping("/ocr")
     public ResponseDto<OcrResponseDto> ocrFromFile(@RequestPart("file") MultipartFile file) {
         try {
@@ -105,10 +106,13 @@ public class InterviewAIController {
             Map<String, Object> sttRes = sttService.sendToSttServer(tempFile, interviewId, seq, question)
                     .doOnNext(res -> redisInterviewService.savePartialSTT(interviewId, seq, res, question))
                     .block();
-
-            // 5) ★정상 흐름에서만 원본 영상 임시보관에 저장
-//            tempMediaService.save(tempFile, interviewId, seq);
-//            savedToMedia = true; // 보관 성공
+            // 5) STT 결과 답변 평가로 보내기
+            String answerText = sttRes == null ? "" : String.valueOf(sttRes.getOrDefault("interview_answer", ""));
+            evaluateService.send(question, answerText)
+                    .subscribe(
+                            evalRes -> redisInterviewService.savePartialEvaluate(interviewId, seq, evalRes)
+                    );
+            // 영상 저장
             mediaStore.save(tempFile, interviewId, seq);   // ✔ 여기로 교체
             savedToMedia = true;
             return ResponseDto.success(new AnswerResponseDto(

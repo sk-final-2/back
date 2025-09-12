@@ -6,8 +6,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
-
+import com.backend.recruitAi.interview.service.EvaluateService.EvaluateResponse;
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -32,7 +33,23 @@ public class RedisInterviewService {
 
         tryPublishIfComplete(interviewId);
     }
+    public void savePartialEvaluate(String interviewId, int seq, EvaluateResponse eval) {
+        String key = "interview:" + interviewId + ":seq:" + seq;
 
+        Map<String, Object> value = new HashMap<>();
+        value.put("good",     nvl(eval.getFeedback())); // feedback -> good (덮어쓰기)
+        value.put("bad",      nvl(eval.getImprove()));  // improve  -> bad  (덮어쓰기)
+        value.put("sttScore", eval.getScore());         // 점수는 sttScore 키로 유지 (요청사항)
+        value.put("evaluateDone", "done");                // ✅ 평가 완료 마커
+
+        System.out.println(eval.getFeedback() + "피드백");
+        System.out.println(eval.getImprove() + "getImprove");
+        System.out.println(eval.getScore() + "getScore");
+        redisTemplate.opsForHash().putAll(key, value);
+        redisTemplate.expire(key, Duration.ofHours(1));
+        tryPublishIfComplete(interviewId);
+    }
+    private static String nvl(String s) { return s == null ? "" : s; }
 
     public void savePartialEmotion(String interviewId, int seq, Map<String, Object> emotion) {
         String key = "interview:" + interviewId + ":seq:" + seq;
@@ -84,9 +101,9 @@ public class RedisInterviewService {
 
             boolean emotionDone = data.containsKey("emotionScore");
             boolean sttDone = data.containsKey("sttScore");
-            //boolean trackingDone = data.containsKey("trackingScore");
-            boolean gazeDone = true;
-            if (!(emotionDone && sttDone && gazeDone)) {
+            boolean trackingDone = data.containsKey("trackingText");
+            boolean evalDone = data.containsKey("evaluateDone");
+            if (!(emotionDone && sttDone && trackingDone && evalDone)) {
                 return;
             }
         }
