@@ -2,7 +2,7 @@
 FROM gradle:8.2.1-jdk17 AS build
 WORKDIR /app
 COPY . .
-RUN chmod +x gradlew && sed -i 's/\r$//' gradlewd
+RUN chmod +x gradlew && sed -i 's/\r$//' gradlew
 RUN ./gradlew build -x test --no-daemon
 # Stage 2: Run the app
 FROM openjdk:17-jdk-alpine
