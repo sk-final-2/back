@@ -39,7 +39,7 @@ public class RedisInterviewService {
         Map<String, Object> value = new HashMap<>();
         value.put("good",     nvl(eval.getFeedback())); // feedback -> good (덮어쓰기)
         value.put("bad",      nvl(eval.getImprove()));  // improve  -> bad  (덮어쓰기)
-        value.put("sttScore", eval.getScore());         // 점수는 sttScore 키로 유지 (요청사항)
+        value.put("sttScore", eval.getScore()*20);         // 점수는 sttScore 키로 유지 (요청사항)
         value.put("evaluateDone", "done");                // ✅ 평가 완료 마커
 
         System.out.println(eval.getFeedback() + "피드백");
