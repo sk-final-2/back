@@ -32,9 +32,15 @@ public class Interview {
     @Column(name = "uuid", nullable = false, unique = true, updatable = false)
     private String uuid; // UUID
 
-    @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @PrePersist
+    public void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now(); // 기존 prod 흐름 보호
+        }
+    }
 
     @Column(name = "job", nullable = false)
     private String job;

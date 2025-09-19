@@ -242,7 +242,73 @@ public class DataInitRunner implements CommandLineRunner {
             interview3.setAnswerAnalyses(Arrays.asList(answer3_1));
             interviewRepository.save(interview3);
             System.out.println("✅ 세 번째 Interview 저장 완료: ID = " + interview3.getId());
-            System.out.println("--- 샘플 인터뷰 데이터 초기화 완료 ---");
+
+            java.util.Random random = new java.util.Random();
+            for (int i = 1; i <= 45; i++) {
+                String name = "랜덤유저" + i;
+                String email = "user" + i + "@test.com";
+
+                int year = 2025;
+                int month = 8 + random.nextInt(2);
+                int day = 1 + random.nextInt(28);
+
+                LocalDate createdDate = LocalDate.of(year, month, day);
+
+                Member newMember = memberRepository.save(
+                        Member.builder()
+                                .email(email)
+                                .name(name)
+                                .password(passwordEncoder.encode("123"))
+                                .postcode("00000")
+                                .address1("서울특별시 강남구 랜덤동")
+                                .address2(i + "호")
+                                .gender(GenderType.values()[random.nextInt(GenderType.values().length)])
+                                .birth(LocalDate.of(1990 + random.nextInt(10), 1 + random.nextInt(12), 1 + random.nextInt(28)))
+                                .provider(Provider.LOCAL)
+                                .role(Role.ROLE_USER)
+                                .createdAt(createdDate.atStartOfDay())
+                                .build()
+                );
+
+                // 인터뷰 생성 시 시·분·초까지 랜덤
+                int hour = random.nextInt(24);
+                int minute = random.nextInt(60);
+                int second = random.nextInt(60);
+
+                Interview interview = Interview.builder()
+                        .member(newMember)
+                        .uuid(UUID.randomUUID().toString())
+                        .createdAt(createdDate.atTime(hour, minute, second))
+                        .job("직무" + (i % 5))
+                        .career(i % 2 == 0 ? "신입" : "경력 " + random.nextInt(5) + "년차")
+                        .type(InterviewType.values()[random.nextInt(InterviewType.values().length)])
+                        .level(Level.values()[random.nextInt(Level.values().length)])
+                        .language(Language.KOREAN)
+                        .count(1)
+                        .build();
+
+                InterviewResult answer = InterviewResult.builder()
+                        .seq(1)
+                        .question("자기소개를 해주세요.")
+                        .answer("안녕하세요, 저는 " + name + " 입니다.")
+                        .good("긍정적인 인상을 주는 답변이었습니다.")
+                        .bad("구체적인 기술 역량 설명이 부족했습니다.")
+                        .score(60.0 + random.nextInt(41)) // 60~100 랜덤
+                        .emotion_score(60.0 + random.nextInt(41))
+                        .mediapipe_text("auto_text")
+                        .blink_score(60.0 + random.nextInt(41))
+                        .eye_score(60.0 + random.nextInt(41))
+                        .head_score(60.0 + random.nextInt(41))
+                        .hand_score(60.0 + random.nextInt(41))
+                        .interview(interview)
+                        .build();
+
+                interview.setAnswerAnalyses(Arrays.asList(answer));
+                interviewRepository.save(interview);
+            }
+
+            System.out.println("✅ 랜덤 멤버 45명 + 인터뷰 45개 추가 완료 ");
+            System.out.println("--- 샘플 인터뷰 데이터 초기화 전체 완료 ---");
         }
     }
 }
