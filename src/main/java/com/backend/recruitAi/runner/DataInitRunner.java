@@ -249,10 +249,13 @@ public class DataInitRunner implements CommandLineRunner {
                 String email = "user" + i + "@test.com";
 
                 int year = 2025;
-                int month = 8 + random.nextInt(2);
+                int month = 8 + random.nextInt(2); // 8월 ~ 9월
                 int day = 1 + random.nextInt(28);
+                int hour = random.nextInt(24);
+                int minute = random.nextInt(60);
+                int second = random.nextInt(60);
 
-                LocalDate createdDate = LocalDate.of(year, month, day);
+                LocalDateTime createdDateTime = LocalDateTime.of(year, month, day, hour, minute, second);
 
                 Member newMember = memberRepository.save(
                         Member.builder()
@@ -266,19 +269,16 @@ public class DataInitRunner implements CommandLineRunner {
                                 .birth(LocalDate.of(1990 + random.nextInt(10), 1 + random.nextInt(12), 1 + random.nextInt(28)))
                                 .provider(Provider.LOCAL)
                                 .role(Role.ROLE_USER)
-                                .createdAt(createdDate.atStartOfDay())
+                                .createdAt(createdDateTime) // ✅ 랜덤 LocalDateTime
                                 .build()
                 );
-
-                // 인터뷰 생성 시 시·분·초까지 랜덤
-                int hour = random.nextInt(24);
-                int minute = random.nextInt(60);
-                int second = random.nextInt(60);
 
                 Interview interview = Interview.builder()
                         .member(newMember)
                         .uuid(UUID.randomUUID().toString())
-                        .createdAt(createdDate.atTime(hour, minute, second))
+                        .createdAt(createdDateTime.plusDays(random.nextInt(5)) // 가입 후 며칠 뒤일 수도 있음
+                                .withHour(random.nextInt(24))
+                                .withMinute(random.nextInt(60)))
                         .job("직무" + (i % 5))
                         .career(i % 2 == 0 ? "신입" : "경력 " + random.nextInt(5) + "년차")
                         .type(InterviewType.values()[random.nextInt(InterviewType.values().length)])

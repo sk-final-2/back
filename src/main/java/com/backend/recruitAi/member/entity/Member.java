@@ -71,8 +71,14 @@ public class Member {
     @Builder.Default
     private Role role = Role.ROLE_USER;
 
-    @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @PrePersist
+    public void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
